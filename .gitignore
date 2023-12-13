@@ -1,5 +1,6 @@
-/pldjreact
+/pldjango
 /Lib
-/epl_referees.py
+/.vscode
 */__pycache__
-.DS_Store
+config/firebase
+.env
