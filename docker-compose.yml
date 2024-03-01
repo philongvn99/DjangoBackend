@@ -1,0 +1,8 @@
+version: "1.0"
+services:
+  db:
+    image: postgres
+    env_file:
+      - env/.env.docker
+    ports:
+      - $POSTGRES_PORT:3306

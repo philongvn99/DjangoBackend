@@ -3,4 +3,4 @@
 /.vscode
 */__pycache__
 config/firebase
-.env
+.env*
