@@ -31,7 +31,7 @@ STATIC_URL = "/static/"
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # INIT FIREBASE CONFIG
-FIREBASE_CONFIG_FILE = 'config/firebase/firebase-config.json'
+FIREBASE_CONFIG_FILE = os.path.join(BASE_DIR, 'config/firebase/firebase-config.json')
 cred = credentials.Certificate(FIREBASE_CONFIG_FILE)
 firebase_admin.initialize_app(cred)
 
@@ -54,7 +54,6 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "django_filters",
-    "Auth.apps.AuthConfig",
     "Team.apps.TeamConfig",
     "Match.apps.MatchConfig",
     "Player.apps.PlayerConfig",
@@ -76,7 +75,6 @@ DISALLOWED_USER_AGENTS = (
     re.compile(r'^Bingbot'),
     re.compile(r'^Googlebot')
 )
-
 
 
 ROOT_URLCONF = "_United.urls"
@@ -158,18 +156,37 @@ REST_FRAMEWORK = {
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "plpostgres_database",
-        "USER": "philong249",
-        "PASSWORD": "01886933234",
-        "HOST": "localhost",
-        "PORT": "5432",
+        "NAME": os.getenv("POSTGRES_DB"),
+        "USER": os.getenv("POSTGRES_USER"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+        "HOST": os.getenv("POSTGRES_HOST"),
+        "PORT": os.getenv("POSTGRES_PORT"),
     },
-    "firebase": {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'CREDENTIALS': cred,
-        'NAME': 'firebase',
-    }
 }
+
+IS_LOGGING = False
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'django_queries.log',  # Choose a file name and path
+        },
+    },
+    'loggers': {
+        'django.db.backends': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+} if IS_LOGGING else None
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
@@ -180,11 +197,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8080",
     "http://127.0.0.1:3000",
 ]
-
-FIREBASE_CONFIG_PATH = os.path.join(BASE_DIR, 'config/firebase/firebase-config.json')
-f = open(FIREBASE_CONFIG_PATH, 'r')
-FIREBASE_CONFIG = json.loads(f.read())
-f.close()
 
 ACTIVATE_JWT = True
 

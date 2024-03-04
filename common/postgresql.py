@@ -1,11 +1,15 @@
 import psycopg2
+from _United import settings
+
+dbSettings = settings.DATABASES["default"]
 
 connectionPG = psycopg2.connect(
-    user="philong249",
-    password="01886933234",
-    host="localhost",
-    port="5432",
-    database="plpostgres_database",
+    user=dbSettings["USER"],
+    password=dbSettings["PASSWORD"],
+    host=dbSettings["HOST"],
+    port=dbSettings["PORT"],
+    database=dbSettings["NAME"],
 )
 
 cursorDB = connectionPG.cursor()
+

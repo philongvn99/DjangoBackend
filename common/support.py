@@ -24,18 +24,22 @@ playerFields = [
 
 #  LEAGUE
 #  League-table FIELDS
-leagueTableField = [
+teamFields = [
     'name',
     'acronym_name',
     'logo_link',
-    'played_game',
-    'won_game',
-    'drawn_game',
-    'lost_game',
-    'goal_for',
-    'goal_against',
-    'goal_difference',
-    'points'
+    ]
+
+teamAttendanceFields = [
+    'play',
+    'win',
+    'draw',
+    'lost',
+    'score',
+    'conceded',
+    'banned',
+    'team',
+    'league'
 ]
 
 username = 'dr3g0ng44m'
