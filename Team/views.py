@@ -2,12 +2,9 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import json
-from Auth import forms
 
-from common import support as sp
-
-from . import models
-from common import exceptions as exc
+from . import models, serializers
+from common import exceptions as exc, support as sp
 # Create your views here.
 
 # EPL LEAGUE             ===============================================================
@@ -19,17 +16,18 @@ def LeagueResult(request, date):
     
 
 @api_view(["GET", "POST", "PUT", "DELETE"])
-def LeagueTable(request, season=2023):    
+def LeagueTable(request, leagueId, season=2023):    
     if request.method == "GET":
-        leagueTeam = models.GroupStageTeam.objects.filter(
-                team_league='PREMIER_LEAGUE',
-                team_season=season
-            ).select_related('team').values()
-        for team in leagueTeam:
-            print(team.team.team_logo_link)
+        leagueTeam = models.TeamAttendance.objects.filter(
+                league_id=leagueId,
+                season=season
+            ).select_related('team')
         if leagueTeam == []:
             raise exc.ResourceNotFound
-        return Response(leagueTeam, status=status.HTTP_200_OK)
+        return Response(
+            serializers.TeamAttendanceSerializer(leagueTeam, many=True).data, 
+            status=status.HTTP_200_OK
+            )
     
     elif request.method == "POST":
         raise exc.ServiceUnavailable

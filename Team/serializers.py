@@ -10,9 +10,9 @@ class TeamSerializer(serializers.ModelSerializer):
     def __str__(self):
         return self.team_name
     
-class GroupStageTeamSerializer(serializers.ModelSerializer):
+class TeamAttendanceSerializer(serializers.ModelSerializer):
     team = TeamSerializer()
     class Meta:
-        model = models.GroupStageTeam
-        fields = sp.leagueTableField
+        model = models.TeamAttendance
+        fields = sp.teamAttendanceFields
 

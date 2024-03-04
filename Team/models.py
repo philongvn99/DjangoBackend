@@ -12,40 +12,53 @@ from common import postgresql as pg
 
 ua = UserAgent()
 class Team(models.Model):
-    team_id = models.CharField(primary_key=True, max_length=10)
-    team_name = models.CharField(max_length=256, blank=True, null=True)
-    team_acronym_name = models.CharField(max_length=256, blank=True, null=True)
-    team_logo_link = models.CharField(max_length=256, blank=True, null=True)
-    team_association = models.CharField(max_length=10, blank=True, null=True)
-    team_location = models.CharField(max_length=32, blank=True, null=True)
+    id = models.AutoField(primary_key=True, db_column="n4_id")
+    name = models.CharField(max_length=50, blank=True, null=True, db_column="str_name")
+    acronym_name = models.CharField(max_length=50, blank=True, null=True, db_column="str_acronym_name")
+    logo_link = models.CharField(max_length=50, blank=True, null=True, db_column="str_logo_link")
+    location = models.CharField(max_length=32, blank=True, null=True, db_column="str_location")
+
 
     class Meta:
         managed = False
-        db_table = 'tb_team'
+        db_table = 'team'
         
     def __str__(self):
-        return self.team_name
+        return self.name
     
-class GroupStageTeam(models.Model):
-    group_stage_team_id = models.CharField(primary_key=True, max_length=10)
-    team_played_game = models.IntegerField()
-    team_won_game = models.IntegerField()
-    team_drawn_game = models.IntegerField()
-    team_lost_game = models.IntegerField()
-    team_goal_for = models.IntegerField()
-    team_goal_against = models.IntegerField()
-    team_goal_difference = models.IntegerField()
-    team_points = models.IntegerField()
-    team_league = models.TextField()  # This field type is a guess.
-    team_season = models.SmallIntegerField()
-    team = models.ForeignKey(Team, models.DO_NOTHING, blank=True, null=True)
+class League(models.Model):
+    id = models.AutoField(primary_key=True, db_column="n4_id")
+    name = models.CharField(max_length=50, blank=True, null=True, db_column="str_name")
+    host = models.CharField(max_length=50, blank=True, null=True, db_column="n4_host")
+    type = models.CharField(max_length=50, blank=True, null=True, db_column="n4_type")
+
+
+    class Meta:
+        managed = False
+        db_table = 'league'
+        
+    def __str__(self):
+        return self.name
+    
+class TeamAttendance(models.Model):
+    id = models.AutoField(primary_key=True, db_column="n4_id")
+    play = models.SmallIntegerField(db_column="n4_play")
+    win = models.SmallIntegerField(db_column="n4_win")
+    draw = models.SmallIntegerField(db_column="n4_draw")
+    lost = models.SmallIntegerField(db_column="n4_lost")
+    score = models.SmallIntegerField(db_column="n4_score")
+    conceded = models.SmallIntegerField(db_column="n4_conceded")
+    banned = models.SmallIntegerField(db_column="n4_banned")
+    season = models.SmallIntegerField(db_column="n4_season")
+    league = models.ForeignKey(League, models.DO_NOTHING, blank=True, null=True, db_column="n4_league_id")
+    team = models.ForeignKey(Team, models.DO_NOTHING, blank=True, null=True, db_column="n4_team_id")
     
     class Meta:
         managed = False
-        db_table = 'tb_group_stage_team'
+        db_table = 'team_attendance'
         
     def __str__(self):
-        return self.team.team_name + '-' + str(self.team_season)
+        return self.team.name + '-' + str(self.season)
     
 # ------------------------- LEAGUE FUNCTIONs ---------------------------------------------------
 def updateLeagueTable(idList, gsList, gcList, nTeam):
