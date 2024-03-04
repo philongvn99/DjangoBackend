@@ -15,11 +15,7 @@ def AllPlayerInfo(request):
         players = {}
         try:
             for position in sp.playerPosition:
-                print(position)
-                players[position + 's'] = sr.PlayerSerializer(
-                        models.Player.objects.filter(player_role=position.upper()),
-                        many=True
-                    ).data
+                players[position + 's'] = models.Player.objects.filter(role=position.upper()).values()
             return Response(players, status=status.HTTP_200_OK)
         except Exception as e:
             raise e
