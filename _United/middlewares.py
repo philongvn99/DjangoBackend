@@ -1,9 +1,11 @@
-from django.http import HttpResponse, JsonResponse
-from rest_framework.response import Response
-from common import support as sp, exceptions as exc
-from rest_framework import status
-from firebase_admin import auth
+
 import re
+
+from django.http import HttpResponse, JsonResponse
+from firebase_admin import auth
+from rest_framework import status
+
+from common import support as sp
 
 
 class JwtHandlerMiddleware():
@@ -23,11 +25,12 @@ class JwtHandlerMiddleware():
 
         header_authorization_value = request.META.get("HTTP_AUTHORIZATION")
         if not header_authorization_value:
-            raise exc.NoAuthToken
+            return HttpResponse('No authentication token provided', status=status.HTTP_401_UNAUTHORIZED)
             
         match = sp.regex_bearer.match(header_authorization_value)
         if not match:
-            raise exc.NoAuthToken
+            return HttpResponse('No authentication token provided', status=status.HTTP_401_UNAUTHORIZED)
+
         
         firebase_jwt = match.groups()[-1]
         try:
@@ -42,6 +45,7 @@ class JwtHandlerMiddleware():
         
     def process_exception(self, request, exception):
         print('Exc Request is: r', request)
+        print(exception)
         return exception
     
     def process_response(self, request, response):
