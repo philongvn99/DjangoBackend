@@ -1,16 +1,20 @@
+import json
+
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-import json
 
-from common import support as sp, exceptions as exc
-from . import models, forms, serializers as sr
+from common import exceptions as exc
+from common import support as sp
+
+from . import forms, models
+from . import serializers as sr
 
 # Create your views here.
 # ALL PLAYER INFOs          ===============================================================
 
 @api_view(["GET", "POST"])
-def AllPlayerInfo(request):
+def AllPlayer(request):
     if request.method == "GET":
         players = {}
         try:
@@ -20,18 +24,21 @@ def AllPlayerInfo(request):
         except Exception as e:
             raise e
     elif request.method == "POST":
+        print(request.data)
         newPlayer = forms.PlayerForm(request.data or None)
         if newPlayer.is_valid():
             newPlayer.save()
             return Response(newPlayer.cleaned_data, status.HTTP_201_CREATED)
         else:
             jsonStr = json.loads(newPlayer.errors.as_json())
+            print(jsonStr)
             raise exc.InvalidInput(jsonStr)
+    
 
 # PLAYER INFOs BY POSITION  ===============================================================
 
 @api_view(["GET"])
-def PlayerInfoByPosition(request, position):
+def PlayerByPosition(request, position):
     if request.method == "GET":
         if(position not in  sp.playerPosition):
             raise exc.ResourceNotFound
@@ -42,7 +49,7 @@ def PlayerInfoByPosition(request, position):
 # PLAYER INFO BY ID         ===============================================================
 
 @api_view(["GET", "PUT", "DELETE"])
-def PlayerInfoByID(request, ID):
+def PlayerByID(request, ID):
     playerByID = models.Player.objects.filter(player_id=ID)
     if playerByID:      
         if request.method == "GET":        
@@ -50,7 +57,7 @@ def PlayerInfoByID(request, ID):
             return Response(srPlayer.data, status=status.HTTP_200_OK)
         elif request.method == "PUT":        
             if playerByID:      
-                srPlayer = sr.PlayerSerializer(playerByID, many=True)
+                models.Player.objects.update(request.data)
                 return Response(srPlayer.data, status=status.HTTP_200_OK)
         elif request.method == "DELETE":        
             playerByID.delete()

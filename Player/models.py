@@ -1,7 +1,6 @@
-import json
-import psycopg2
+
 from django.db import models
-from django.core.validators import MaxLengthValidator, MinValueValidator
+
 
 # Create your models here.    
 # ==============================================================//
@@ -20,7 +19,7 @@ class Player(models.Model):
     id = models.AutoField(primary_key=True, db_column="n4_id")
     name = models.CharField(max_length=50, db_column="str_name")
     full_name = models.CharField(max_length=50, db_column="str_full_name")
-    avatar_link = models.CharField(max_length=50, db_column="str_avatar_link")
+    avatar_link = models.CharField(max_length=100, db_column="str_avatar_link")
     nationality = models.CharField(max_length=30, db_column="str_nationality")
     birthday = models.DateField(db_column="dt_birthday")
     right_foot = models.BooleanField(db_column="is_right_foot")
