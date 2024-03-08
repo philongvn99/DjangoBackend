@@ -1,11 +1,11 @@
-from django.db import models
-from django.core.validators import MaxLengthValidator, MinValueValidator
-
-from fake_useragent import UserAgent
 from urllib.request import Request, urlopen
+
 from bs4 import BeautifulSoup
-from common import support as sp
+from django.db import models
+from fake_useragent import UserAgent
+
 from common import postgresql as pg
+from common import support as sp
 
 # Create your models here.    
 
@@ -15,7 +15,7 @@ class Team(models.Model):
     id = models.AutoField(primary_key=True, db_column="n4_id")
     name = models.CharField(max_length=50, blank=True, null=True, db_column="str_name")
     acronym_name = models.CharField(max_length=50, blank=True, null=True, db_column="str_acronym_name")
-    logo_link = models.CharField(max_length=50, blank=True, null=True, db_column="str_logo_link")
+    logo_link = models.CharField(max_length=100, blank=True, null=True, db_column="str_logo_link")
     location = models.CharField(max_length=32, blank=True, null=True, db_column="str_location")
 
 
@@ -89,7 +89,7 @@ def getLeagueResults(dateString:str):
     for res in resultSoup[:10]:
         teams = [team.text for team in res.select("a.AnchorLink")]
         score = res.find("a", {"class": "AnchorLink at"}).text.split(' ')
-        if len(score) > 1:
+        if teams[-1] == 'FT':
             results["home"].append(teams[1])
             results["away"].append(teams[4])
             results["score"][f'home{i}'] = int(score[1])

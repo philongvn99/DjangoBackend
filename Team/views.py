@@ -1,11 +1,27 @@
+import json
+
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-import json
 
-from . import models, serializers
-from common import exceptions as exc, support as sp
+from common import exceptions as exc
+from common import support as sp
+
+from . import forms, models, serializers
+
+
 # Create your views here.
+@api_view(["GET", "POST", "PUT", "DELETE"])
+def Team(request):
+    if request.method == 'POST':
+        newTeam = forms.PlayerForm(request.data)
+        if newTeam.is_valid():
+            newTeam.save()
+            return Response(newTeam.cleaned_data, status.HTTP_201_CREATED)
+        else:
+            jsonStr = json.loads(newTeam.errors.as_json())
+            print(jsonStr)
+            raise exc.InvalidInput(jsonStr)
 
 # EPL LEAGUE             ===============================================================
 @api_view(["GET"])
@@ -30,6 +46,7 @@ def LeagueTable(request, leagueId, season=2023):
             )
     
     elif request.method == "POST":
+        models.Team.objects.create(request.data)
         raise exc.ServiceUnavailable
     
     elif request.method == "PUT":
