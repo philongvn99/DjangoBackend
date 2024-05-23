@@ -14,7 +14,7 @@ from . import forms, models, serializers
 @api_view(["GET", "POST", "PUT", "DELETE"])
 def Team(request):
     if request.method == 'POST':
-        newTeam = forms.PlayerForm(request.data)
+        newTeam = forms.NewTeamForm(request.data)
         if newTeam.is_valid():
             newTeam.save()
             return Response(newTeam.cleaned_data, status.HTTP_201_CREATED)

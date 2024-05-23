@@ -1,6 +1,8 @@
 from django.db import models
-from Team.models import Team
+
 from Player.models import Player
+from Team.models import Team
+
 
 # Create your models here.    
 # ==============================================================//
@@ -38,7 +40,7 @@ class MatchEvent(models.Model):
         ('OUT_OF_TIME', 'OUT_OF_TIME')
     ]
     id = models.AutoField(primary_key=True, db_column="n4_id")
-    match = models.ForeignKey(Match, models.CASCADE(), blank=True, null=False, db_column="n4_match_id")
+    match = models.ForeignKey(Match, models.CASCADE, blank=True, null=False, db_column="n4_match_id")
     player = models.ForeignKey(Player, models.CASCADE, blank=True, null=False, db_column="n4_player_id")
     minute = models.IntegerField(db_column="n4_minute")
     part = models.TextField(choices=MATCH_PARTS, null=True, db_column="str_half") 

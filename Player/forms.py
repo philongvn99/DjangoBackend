@@ -4,7 +4,12 @@ from django import forms
 from .models import Player
 
 
-class PlayerForm(forms.ModelForm):
+class NewPlayerForm(forms.ModelForm):
     class Meta:
         model=Player
         fields="__all__"
+        
+class UpdatePlayerForm(forms.ModelForm):
+    class Meta:
+        model=Player
+        fields=['kit_number', 'salary', 'height', 'nationality', 'role', 'status', 'avatar_link']

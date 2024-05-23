@@ -24,8 +24,7 @@ def AllPlayer(request):
         except Exception as e:
             raise e
     elif request.method == "POST":
-        print(request.data)
-        newPlayer = forms.PlayerForm(request.data or None)
+        newPlayer = forms.NewPlayerForm(request.data or None)
         if newPlayer.is_valid():
             newPlayer.save()
             return Response(newPlayer.cleaned_data, status.HTTP_201_CREATED)
@@ -33,6 +32,8 @@ def AllPlayer(request):
             jsonStr = json.loads(newPlayer.errors.as_json())
             print(jsonStr)
             raise exc.InvalidInput(jsonStr)
+
+        
     
 
 # PLAYER INFOs BY POSITION  ===============================================================
@@ -50,15 +51,20 @@ def PlayerByPosition(request, position):
 
 @api_view(["GET", "PUT", "DELETE"])
 def PlayerByID(request, ID):
-    playerByID = models.Player.objects.filter(player_id=ID)
+    playerByID = models.Player.objects.filter(id=ID)
     if playerByID:      
         if request.method == "GET":        
             srPlayer = sr.PlayerSerializer(playerByID, many=True)
             return Response(srPlayer.data, status=status.HTTP_200_OK)
-        elif request.method == "PUT":        
-            if playerByID:      
-                models.Player.objects.update(request.data)
-                return Response(srPlayer.data, status=status.HTTP_200_OK)
+        elif request.method == "PUT":   
+            updatePlayer = forms.UpdatePlayerForm(request.data or None)
+            if updatePlayer.is_valid():
+                # updatePlayer.save()
+                playerByID.update(**request.data)
+                return Response({"message": 'success'}, status=status.HTTP_200_OK)
+            else:
+                jsonStr = json.loads(updatePlayer.errors.as_json())
+                raise exc.InvalidInput(jsonStr)     
         elif request.method == "DELETE":        
             playerByID.delete()
             return Response(playerByID, status=status.HTTP_202_ACCEPTED)
