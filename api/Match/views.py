@@ -1,7 +1,6 @@
 from django.http import HttpResponse
 from django.template.loader import get_template
 from rest_framework.decorators import api_view
-from common import support as sp, exceptions as exc
 
 from . import forms
 

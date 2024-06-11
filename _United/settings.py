@@ -10,12 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
-import os, json, re
+import os
+import re
 from pathlib import Path
-from dotenv import load_dotenv
-import firebase_admin
-from firebase_admin import credentials
 
+import firebase_admin
+from dotenv import load_dotenv
+from firebase_admin import credentials
 
 load_dotenv()
 
@@ -31,7 +32,7 @@ STATIC_URL = "/static/"
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # INIT FIREBASE CONFIG
-FIREBASE_CONFIG_FILE = os.path.join(BASE_DIR, 'config/firebase/firebase-config.json')
+FIREBASE_CONFIG_FILE = os.path.join(BASE_DIR, 'src/config/firebase/firebase-config.json')
 cred = credentials.Certificate(FIREBASE_CONFIG_FILE)
 firebase_admin.initialize_app(cred)
 
@@ -47,16 +48,17 @@ INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
-    "django.contrib.sessions",
     "django.contrib.messages",
-    "django.contrib.staticfiles",
-    "rest_framework",
-    "rest_framework.authtoken",
-    "corsheaders",
-    "django_filters",
-    "Team.apps.TeamConfig",
-    "Match.apps.MatchConfig",
-    "Player.apps.PlayerConfig",
+    "django.contrib.sessions", # for login admin site
+    "django.contrib.staticfiles", # for web design
+    "api.Team",
+    "api.Match",
+    "api.Player",
+    # "rest_framework",
+    # "rest_framework.authtoken",
+    # "corsheaders",
+    # "django_filters",
+    # '_United',
 ]
 
 MIDDLEWARE = [

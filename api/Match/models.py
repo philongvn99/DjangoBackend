@@ -1,14 +1,15 @@
+from django.contrib import admin
 from django.db import models
 
-from Player.models import Player
-from Team.models import Team
+from api.Player.models import Player
+from api.Team.models import TeamAttendance
 
 
 # Create your models here.    
 # ==============================================================//
 class Match(models.Model):
     match_id = models.AutoField(primary_key=True, db_column="n4_id")
-    match_enemy = models.ForeignKey(Team, models.CASCADE, null=False, db_column="n4_enemy_id")
+    match_enemy = models.ForeignKey(TeamAttendance, models.CASCADE, null=False, db_column="n4_enemy_id")
     match_stadium = models.CharField(max_length=50, db_column='str_name')
     match_home = models.BooleanField()
     match_home_score = models.IntegerField(blank=True, null=True)
@@ -18,8 +19,19 @@ class Match(models.Model):
     match_referee = models.CharField(max_length=50, blank=True, null=True)
     match_type = models.TextField(blank=True, null=True) 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'match'
+        
+    def __str__(self):
+        return self.match_enemy.__str__() + ' ' +  self.match_type
+    
+@admin.register(Match)
+class MatchAdmin(admin.ModelAdmin):   
+    list_display = ('match_enemy', 'match_date', 'match_type')
+     
+    @admin.display(description='Birth decade')
+    def decade_born_in(self):
+        return '%d’s' % (self.list_display)
         
 
 class MatchEvent(models.Model):
@@ -44,8 +56,16 @@ class MatchEvent(models.Model):
     player = models.ForeignKey(Player, models.CASCADE, blank=True, null=False, db_column="n4_player_id")
     minute = models.IntegerField(db_column="n4_minute")
     part = models.TextField(choices=MATCH_PARTS, null=True, db_column="str_half") 
-    role = models.TextField(choices=MATCH_TYPE, null=True, db_column="str_type") 
+    type = models.TextField(choices=MATCH_TYPE, null=True, db_column="str_type") 
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'match_event'
+        
+@admin.register(MatchEvent)
+class MatchEventAdmin(admin.ModelAdmin):    
+    list_display = ('match', 'player', 'minute', 'type')
+     
+    @admin.display(description='Birth decade')
+    def decade_born_in(self):
+        return '%d %d' % (self.list_display)

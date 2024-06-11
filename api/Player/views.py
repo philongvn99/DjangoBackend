@@ -4,8 +4,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from common import exceptions as exc
-from common import support as sp
+from src.common import exceptions as exc
+from src.common import support as sp
 
 from . import forms, models
 from . import serializers as sr
