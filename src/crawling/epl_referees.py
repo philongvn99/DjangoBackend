@@ -3,7 +3,7 @@ from fake_useragent import UserAgent
 from urllib.request import Request, urlopen
 import csv, datetime, argparse
 from bs4 import BeautifulSoup
-from statistic_model import MatchStaistic
+from statistic_model import MatchStatistic
 
 # Initialize User Agent
 ua = UserAgent()
@@ -30,10 +30,12 @@ def season_from_date(date):
     _, month, year = date.split('/')
     return f'{year}-{int(year)-1999}' if int(month) > 7 else f'{int(year)-1}-{int(year)-2000}'
 
-def manipulateJsonStats(data: MatchStaistic):
-        team1 = data.entity.teams[0].team.name
-        team2 = data.entity.teams[1].team.name
-        print(team1, team2)
+def manipulateJsonStats(data):
+        match_stats = MatchStatistic(data)
+        match_stats.get_stats(data)
+        
+        print(vars(match_stats))
+        
         
         
     

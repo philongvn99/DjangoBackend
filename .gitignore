@@ -2,5 +2,5 @@
 /Lib
 /.vscode
 *\__pycache__
-config/firebase
+src/config/firebase
 .env*
