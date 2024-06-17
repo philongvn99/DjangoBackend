@@ -1,11 +1,13 @@
 from urllib.request import Request, urlopen
+from django.contrib import admin
+
 
 from bs4 import BeautifulSoup
 from django.db import models
 from fake_useragent import UserAgent
 
-from common import postgresql as pg
-from common import support as sp
+from src.common import postgresql as pg
+from src.common import support as sp
 
 # Create your models here.    
 
@@ -13,32 +15,48 @@ from common import support as sp
 ua = UserAgent()
 class Team(models.Model):
     id = models.AutoField(primary_key=True, db_column="n4_id")
-    name = models.CharField(max_length=50, blank=True, null=True, db_column="str_name")
-    acronym_name = models.CharField(max_length=50, blank=True, null=True, db_column="str_acronym_name")
-    logo_link = models.CharField(max_length=100, blank=True, null=True, db_column="str_logo_link")
-    location = models.CharField(max_length=32, blank=True, null=True, db_column="str_location")
+    team_name = models.CharField(max_length=50, blank=True, null=True, db_column="str_name")
+    team_acronym_name = models.CharField(max_length=50, blank=True, null=True, db_column="str_acronym_name")
+    team_logo_link = models.CharField(max_length=100, blank=True, null=True, db_column="str_logo_link")
+    team_location = models.CharField(max_length=32, blank=True, null=True, db_column="str_location")
 
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'team'
         
     def __str__(self):
-        return self.name
+        return self.team_name
+    
+@admin.register(Team)
+class TeamAdmin(admin.ModelAdmin):    
+    list_display = ('team_name', 'team_location')
+     
+    @admin.display(description='Birth decade')
+    def decade_born_in(self):
+        return '%d’s' % (self.name)
     
 class League(models.Model):
     id = models.AutoField(primary_key=True, db_column="n4_id")
     name = models.CharField(max_length=50, blank=True, null=True, db_column="str_name")
-    host = models.CharField(max_length=50, blank=True, null=True, db_column="n4_host")
-    type = models.CharField(max_length=50, blank=True, null=True, db_column="n4_type")
+    host = models.CharField(max_length=50, blank=True, null=True, db_column="str_host")
+    type = models.CharField(max_length=50, blank=True, null=True, db_column="str_type")
 
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'league'
         
     def __str__(self):
         return self.name
+    
+@admin.register(League)
+class LeagueAdmin(admin.ModelAdmin):    
+    list_display = ('name',)
+     
+    @admin.display(description='Birth decade')
+    def decade_born_in(self):
+        return '%d’s' % (self.list_display)
     
 class TeamAttendance(models.Model):
     id = models.AutoField(primary_key=True, db_column="n4_id")
@@ -54,11 +72,22 @@ class TeamAttendance(models.Model):
     team = models.ForeignKey(Team, models.DO_NOTHING, blank=True, null=True, db_column="n4_team_id")
     
     class Meta:
-        managed = False
+        managed = True
         db_table = 'team_attendance'
         
     def __str__(self):
-        return self.team.name + '-' + str(self.season)
+        return self.team.team_name + '-' + str(self.season)
+    
+@admin.register(TeamAttendance)
+class TeamAttendanceAdmin(admin.ModelAdmin):    
+    list_display = ('team', 'league', 'season')
+    list_per_page = 20
+    ordering = ('-season', 'league')
+    
+     
+    @admin.display(description='Birth decade')
+    def decade_born_in(self):
+        return '%d’s' % (self.list_display)
     
 # ------------------------- LEAGUE FUNCTIONs ---------------------------------------------------
 def updateLeagueTable(idList, gsList, gcList, nTeam):
