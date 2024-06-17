@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from common import support as sp
+from src.common import support as sp
 from . import models
         
 class TeamSerializer(serializers.ModelSerializer):

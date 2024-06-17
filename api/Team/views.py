@@ -1,11 +1,12 @@
 import json
+from django.apps import apps
 
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from common import exceptions as exc
-from common import support as sp
+from src.common import exceptions as exc
+from src.common import support as sp
 
 from . import forms, models, serializers
 
@@ -13,8 +14,12 @@ from . import forms, models, serializers
 # Create your views here.
 @api_view(["GET", "POST", "PUT", "DELETE"])
 def Team(request):
+    if request.method == 'GET':
+        models = {        model for model in apps.get_app_configs()        }
+        print(models)
+        return {"message": "success"}
     if request.method == 'POST':
-        newTeam = forms.PlayerForm(request.data)
+        newTeam = forms.NewTeamForm(request.data)
         if newTeam.is_valid():
             newTeam.save()
             return Response(newTeam.cleaned_data, status.HTTP_201_CREATED)

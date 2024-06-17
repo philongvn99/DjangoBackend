@@ -1,5 +1,6 @@
 
 from django.db import models
+from django.contrib import admin
 
 
 # Create your models here.    
@@ -19,7 +20,7 @@ class Player(models.Model):
     id = models.AutoField(primary_key=True, db_column="n4_id")
     name = models.CharField(max_length=50, db_column="str_name")
     full_name = models.CharField(max_length=50, db_column="str_full_name")
-    avatar_link = models.CharField(max_length=100, db_column="str_avatar_link")
+    avatar_link = models.CharField(max_length=150, db_column="str_avatar_link")
     nationality = models.CharField(max_length=30, db_column="str_nationality")
     birthday = models.DateField(db_column="dt_birthday")
     right_foot = models.BooleanField(db_column="is_right_foot")
@@ -30,11 +31,19 @@ class Player(models.Model):
     status = models.CharField(max_length=50, choices=STATUSES, null=False, db_column="str_status")
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'player'
         ordering = ['birthday']
         
     def __str__(self):
         return self.name
+    
+@admin.register(Player)
+class PlayerAdmin(admin.ModelAdmin):    
+    list_display = ('name', 'nationality', 'kit_number')
+     
+    @admin.display(description='Birth decade')
+    def decade_born_in(self):
+        return '%d’s' % (self.name)
 
     
