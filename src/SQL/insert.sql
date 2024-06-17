@@ -1,3 +1,7 @@
+ALTER SEQUENCE league_n4_id_seq  RESTART WITH 10000;
+ALTER SEQUENCE team_n4_id_seq  RESTART WITH 10000;
+ALTER SEQUENCE player_n4_id_seq  RESTART WITH 10000;
+
 INSERT INTO public.player (n4_id, str_name, str_full_name, str_avatar_link, str_nationality, dt_birthday, is_right_foot, n4_kit_number, n4_height, str_role, n4_salary, str_status) VALUES (1, 'De Gea', 'David de Gea Quintana', 'https://resources.premierleague.com/premierleague/photos/players/250x250/p51940.png', 'Spain', '1990-11-07', true, 1, 192, 'GOALKEEPER', 375, 'ACTIVE');
 INSERT INTO public.player (n4_id, str_name, str_full_name, str_avatar_link, str_nationality, dt_birthday, is_right_foot, n4_kit_number, n4_height, str_role, n4_salary, str_status) VALUES (2, 'Dean Henderson', 'Dean Bradley Henderson', 'https://resources.premierleague.com/premierleague/photos/players/250x250/p172649.png', 'Endland', '1997-03-12', true, 26, 188, 'GOALKEEPER', 100, 'ACTIVE');
 INSERT INTO public.player (n4_id, str_name, str_full_name, str_avatar_link, str_nationality, dt_birthday, is_right_foot, n4_kit_number, n4_height, str_role, n4_salary, str_status) VALUES (3, 'Maguire', 'Jacob Harry Maguire', 'https://assets.manutd.com/AssetPicker/images/0/0/15/66/1000142/Treated_Player_Profile_Thumbnail_Maguire_11626421871630.jpg', 'Endland', '1993-03-05', true, 5, 194, 'DEFENDER', 190, 'ACTIVE');
