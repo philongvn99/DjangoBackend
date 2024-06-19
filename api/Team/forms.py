@@ -1,11 +1,15 @@
-
 from django import forms
 
-from .models import Team
+from api.Team import models
 
 
 class NewTeamForm(forms.ModelForm):
     class Meta:
-        model=Team
-        fields="__all__"
-        
+        model = models.Team
+        fields = "__all__"
+
+
+class TeamAttendanceForm(forms.ModelForm):
+    class Meta:
+        model = models.TeamAttendance
+        fields = "__all__"

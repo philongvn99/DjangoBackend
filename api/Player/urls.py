@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from api.Player import views
 
 urlpatterns = [
     path("", views.AllPlayer, name="Player"),

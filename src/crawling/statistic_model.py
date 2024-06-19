@@ -1,49 +1,48 @@
 import datetime
-from typing import List
 
 
 class Ground:
-    def __init__(self, input):
-        self.name = input["name"]
-        self.city = input["city"]
+    def __init__(self, data):
+        self.name = data["name"]
+        self.city = data["city"]
 
 
 class TeamInfo:
     name: str
-    shortName: str
+    short_name: str
     id: int
 
-    def __init__(self, input):
-        self.id = input["team"]["id"]
-        self.name = input["team"]["name"]
-        self.shortName = input["team"]["shortName"]
+    def __init__(self, data):
+        self.id = data["team"]["id"]
+        self.name = data["team"]["name"]
+        self.short_name = data["team"]["shortName"]
 
 
 class MatchInfo:
-    gameweekId: int
-    matchId: int
+    game_week_id: int
+    match_id: int
     season: str
     round: int
     league: str
     kickoff: str
-    groundName: Ground
+    ground_name: Ground
     attendance: int
 
-    def __init__(self, input):
-        gameweek = input["gameweek"]
-        self.gameweekId = gameweek["id"]
-        self.matchId = input["id"]
+    def __init__(self, data):
+        gameweek = data["gameweek"]
+        self.game_week_id = gameweek["id"]
+        self.match_id = data["id"]
         self.season = gameweek["compSeason"]["label"]
         self.round = gameweek["gameweek"]
         self.league = gameweek["compSeason"]["competition"]["description"]
         self.kickoff = datetime.datetime.strptime(
-            input["kickoff"]["label"][:-4], "%a %d %b %Y, %H:%M"
+            data["kickoff"]["label"][:-4], "%a %d %b %Y, %H:%M"
         ).strftime("%d/%m/%Y")
-        self.groundName = Ground(input["ground"])
-        self.attendance = input.get("attendance", 0)
+        self.ground_name = Ground(data["ground"])
+        self.attendance = data.get("attendance", 0)
 
 
-class Statistic(dict):
+class Statistic:
     ftg: int  # fulltime goal
     htg: int  # halftime goal
     sh: int  # shot
@@ -68,8 +67,8 @@ class TeamStat:
     info: TeamInfo
     stats: Statistic
 
-    def __init__(self, input: dict):
-        self.info = TeamInfo(input)
+    def __init__(self, data: dict):
+        self.info = TeamInfo(data)
         self.stats = Statistic()
 
 
@@ -78,17 +77,17 @@ class MatchStatistic:
     team1: TeamStat
     team2: TeamStat
 
-    def __init__(self, input: dict):
-        self.match = MatchInfo(input["entity"])
+    def __init__(self, data: dict):
+        self.match = MatchInfo(data["entity"])
 
-        self.team1 = TeamStat(input["entity"]["teams"][0])
-        self.team2 = TeamStat(input["entity"]["teams"][1])
+        self.team1 = TeamStat(data["entity"]["teams"][0])
+        self.team2 = TeamStat(data["entity"]["teams"][1])
 
-        self.team1.stats.ftg = input["entity"]["teams"][0]["score"]
-        self.team2.stats.ftg = input["entity"]["teams"][1]["score"]
+        self.team1.stats.ftg = data["entity"]["teams"][0]["score"]
+        self.team2.stats.ftg = data["entity"]["teams"][1]["score"]
 
-    def get_stats(self, input):
-        for stat in input["data"][str(self.team1.info.id)]["M"]:
+    def get_stats(self, data):
+        for stat in data["data"][str(self.team1.info.id)]["M"]:
             if stat["name"] == "first_half_goals":
                 self.team1.stats.htg = stat["value"]
             elif stat["name"] == "total_scoring_att":
@@ -104,7 +103,7 @@ class MatchStatistic:
             elif stat["name"] == "total_red_card":
                 self.team1.stats.rc = stat["value"]
 
-        for stat in input["data"][str(self.team2.info.id)]["M"]:
+        for stat in data["data"][str(self.team2.info.id)]["M"]:
             if stat["name"] == "first_half_goals":
                 self.team2.stats.htg = stat["value"]
             elif stat["name"] == "total_scoring_att":

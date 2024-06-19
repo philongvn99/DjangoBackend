@@ -1,0 +1,14 @@
+[MESSAGES CONTROL]
+disable=missing-module-docstring,
+        missing-function-docstring,
+        missing-class-docstring
+
+[MASTER]
+load-plugins=pylint_django
+django-settings-module=_United.settings
+init-hook="import sys; sys.path.append('C:\\Users\\reddevils99\\Documents\\Django-React\\DjangoBackend')"
+ignore-paths=.*/migrations
+disable=R0903,
+        R0902,
+        R0912,
+        R0801

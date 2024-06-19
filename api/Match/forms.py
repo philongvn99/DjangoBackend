@@ -1,5 +1,6 @@
 from django import forms
 
+
 class MatchResultForm(forms.Form):
     goalscore = forms.IntegerField(required=True)
     goalconceeded = forms.IntegerField(required=True)

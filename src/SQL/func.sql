@@ -1,21 +1,21 @@
 DROP TYPE IF EXISTS infoType CASCADE;
+
 DROP FUNCTION update_league_table(integer[],integer[],integer[],integer);
 
-
 CREATE TYPE infoType AS (
-	"id" int,
-	"name" varchar(256),
-	"full_name" varchar(256),
-	"avatar_link" varchar(256),
-	"nationality" varchar(30),
-	"birthday" date,
-	"right_foot" bool,
-	"kit_number" int,
-	"height" int,
-	"role" roles,
-	"salary" int,
-	"status" player_statuses
-  );
+    "id" int,
+    "name" varchar(256),
+    "full_name" varchar(256),
+    "avatar_link" varchar(256),
+    "nationality" varchar(30),
+    "birthday" date,
+    "right_foot" bool,
+    "kit_number" int,
+    "height" int,
+    "role" roles,
+    "salary" int,
+    "status" player_statuses
+);
 
 CREATE OR REPLACE FUNCTION get_player_by_id("p_id" int)
 	RETURNS SETOF infoType
@@ -35,10 +35,10 @@ CREATE OR REPLACE FUNCTION get_all_teams("season" smallint DEFAULT 2023)
 	$func$
 		BEGIN
 			RETURN QUERY
-				SELECT * FROM team 
+				SELECT * FROM team
 					WHERE team_season = "season"
 
-					ORDER BY 	team_points DESC, 
+					ORDER BY 	team_points DESC,
 								team_goal_difference DESC,
 								team_goal_for DESC,
 								team_goal_against ASC,
@@ -72,41 +72,41 @@ CREATE OR REPLACE FUNCTION  update_league_table(
 		addPts int;
 		resType varchar(256);
 	BEGIN
-		FOR i IN 1..nMatch 
+		FOR i IN 1..nMatch
 		LOOP
-			CASE 
+			CASE
 				WHEN gsList[i] > gcList[i] THEN
 						resType := 'team_win_game';
 						addPts := 3;
 				WHEN gsList[i] < gcList[i] THEN
 						resType := 'team_lost_game';
 						addPts := 0;
-				ELSE 
+				ELSE
 					resType := 'team_drawn_game';
 					addPts := 1;
 			END CASE;
 			EXECUTE FORMAT(
 						'UPDATE group_stage
-							SET 
+							SET
 								%1$s = %1$s + 1,
 								team_played_game = team_played_game + 1,
 								team_goal_for = team_goal_for + %3$s,
 								team_goal_against = team_goal_against + %4$s,
 								team_goal_difference = team_goal_difference + %3$s - %4$s,
 								team_points = team_points + %2$s
-							WHERE team_id = %5$s AND team_season = %6$s AND team_league = %7$s', 
-						resType, 
-						addPts, 
-						gsList[i], 
-						gcList[i], 
+							WHERE team_id = %5$s AND team_season = %6$s AND team_league = %7$s',
+						resType,
+						addPts,
+						gsList[i],
+						gcList[i],
 						idList[i],
 						season,
 						league
 					);
 		END LOOP;
 		------------------------
-		RETURN QUERY 
-				SELECT 
+		RETURN QUERY
+				SELECT
 					team_name,
 					team_played_game,
 					team_win_game,
@@ -115,7 +115,7 @@ CREATE OR REPLACE FUNCTION  update_league_table(
 					team_goal_for,
 					team_goal_against,
 					team_goal_difference,
-					team_points 
+					team_points
 				FROM team where team_id = ANY (idList);
 	END
 	$func$;
@@ -145,8 +145,8 @@ CREATE OR REPLACE FUNCTION  clear_league_table()
 				team_goal_difference = 0,
 				team_points = 0;
 		---------------------------------
-		RETURN QUERY 
-				SELECT 
+		RETURN QUERY
+				SELECT
 					team_name,
 					team_played_game,
 					team_win_game,
@@ -155,17 +155,16 @@ CREATE OR REPLACE FUNCTION  clear_league_table()
 					team_goal_for,
 					team_goal_against,
 					team_goal_difference,
-					team_points 
+					team_points
 				FROM team ;
 	END
 	$func$;
-
 
 CREATE OR REPLACE FUNCTION authenticate_user(user_name VARCHAR(256), user_password VARCHAR(256))
 	RETURNS user_return_info
 	LANGUAGE plpgsql AS
 	$func$
-	DECLARE 
+	DECLARE
 		user_info user_return_info DEFAULT NULL;
 	BEGIN
 		SELECT account_username AS username, account_email AS email, account_phone AS phone, account_name AS "name"

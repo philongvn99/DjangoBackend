@@ -2,14 +2,13 @@ from django.http import HttpResponse
 from django.template.loader import get_template
 from rest_framework.decorators import api_view
 
-from . import forms
+from api.Match import forms
+
 
 @api_view(["GET", "POST"])
-def MatchForm(request):
+def match_form(_):
     return HttpResponse(
-        get_template("my_template.html")
-            .render({
-                'form' : forms.MatchResultForm(),
-                'url_name': 'match'
-            })
-    )  
+        get_template("my_template.html").render(
+            {"form": forms.MatchResultForm(), "url_name": "match"}
+        )
+    )
