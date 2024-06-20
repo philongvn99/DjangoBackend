@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
+# pylint: disable-all
 import os
 import re
 from pathlib import Path
@@ -32,11 +33,14 @@ STATIC_URL = "/static/"
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # INIT FIREBASE CONFIG
-FIREBASE_CONFIG_FILE = os.path.join(
-    BASE_DIR, "src/config/firebase/firebase-config.json"
-)
-cred = credentials.Certificate(FIREBASE_CONFIG_FILE)
-firebase_admin.initialize_app(cred)
+try:
+    FIREBASE_CONFIG_FILE = os.path.join(
+        BASE_DIR, "src/config/firebase/firebase-config.json"
+    )
+    cred = credentials.Certificate(FIREBASE_CONFIG_FILE)
+    firebase_admin.initialize_app(cred)
+except:
+    print("CANNOT CONNECT FIREBASE")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
