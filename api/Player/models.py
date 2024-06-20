@@ -1,9 +1,8 @@
-
 from django.db import models
 from django.contrib import admin
 
 
-# Create your models here.    
+# Create your models here.
 # ==============================================================//
 class Player(models.Model):
     ROLES = [
@@ -26,24 +25,21 @@ class Player(models.Model):
     right_foot = models.BooleanField(db_column="is_right_foot")
     kit_number = models.IntegerField(db_column="n4_kit_number")
     height = models.IntegerField(db_column="n4_height")
-    role = models.TextField(choices=ROLES, null=True, db_column="str_role") 
+    role = models.TextField(choices=ROLES, null=True, db_column="str_role")
     salary = models.IntegerField(blank=True, null=True, db_column="n4_salary")
-    status = models.CharField(max_length=50, choices=STATUSES, null=False, db_column="str_status")
+    status = models.CharField(
+        max_length=50, choices=STATUSES, null=False, db_column="str_status"
+    )
 
     class Meta:
         managed = True
-        db_table = 'player'
-        ordering = ['birthday']
-        
+        db_table = "player"
+        ordering = ["birthday"]
+
     def __str__(self):
         return self.name
-    
-@admin.register(Player)
-class PlayerAdmin(admin.ModelAdmin):    
-    list_display = ('name', 'nationality', 'kit_number')
-     
-    @admin.display(description='Birth decade')
-    def decade_born_in(self):
-        return '%d’s' % (self.name)
 
-    
+
+@admin.register(Player)
+class PlayerAdmin(admin.ModelAdmin):
+    list_display = ("name", "nationality", "kit_number")

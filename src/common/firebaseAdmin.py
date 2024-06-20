@@ -1,9 +1,7 @@
-import os
+# pylint: disable=C0103
+import firebase_admin as fa
 from _United import settings
-import firebase_admin
-from firebase_admin import credentials
 
+cred = fa.credentials.Certificate(settings.FIREBASE_CONFIG_FILE)
 
-cred = credentials.Certificate(settings.FIREBASE_CONFIG_FILE) 
-
-djangoFirebaseAdmin = firebase_admin.initialize_app(cred)
+djangoFirebaseAdmin = fa.initialize_app(cred)

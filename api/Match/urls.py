@@ -1,7 +1,7 @@
 from django.urls import path
-from . import views
+from api.Match import views
 
 
 urlpatterns = [
-    path("form", views.MatchForm, name="MatchForm"),
+    path("form", views.match_form, name="MatchForm"),
 ]
