@@ -1,5 +1,4 @@
 import json
-from django.apps import apps
 
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -15,10 +14,8 @@ from api.Team import serializers
 
 # Create your views here.
 @api_view(["GET", "POST", "PUT", "DELETE"])
-def Team(request):
+def team(request):
     if request.method == "GET":
-        models = {model for model in apps.get_app_configs()}
-        print(models)
         return {"message": "success"}
     if request.method == "POST":
         new_team = forms.NewTeamForm(request.data)
@@ -34,39 +31,34 @@ def Team(request):
 
 # EPL LEAGUE             ===============================================================
 @api_view(["GET"])
-def LeagueResult(request, date):
+def league_result(request, date):
     if request.method == "GET":
-        results = models.getLeagueResults(date)
+        results = models.get_league_results(date)
         return Response(results, status=status.HTTP_200_OK)
     return Response({}, status=status.HTTP_200_OK)
 
 
 @api_view(["GET", "POST", "PUT", "DELETE"])
-def LeagueTable(request, leagueId, season=2023):
+def league_table(request, league_id, season=2023):
     if request.method == "GET":
-        leagueTeam = models.TeamAttendance.objects.filter(
-            league_id=leagueId, season=season
+        league_team = models.TeamAttendance.objects.filter(
+            league_id=league_id, season=season
         ).select_related("team")
-        if leagueTeam == []:
+        if league_team == []:
             raise exc.ResourceNotFound
         return Response(
-            serializers.TeamAttendanceSerializer(leagueTeam, many=True).data,
+            serializers.TeamAttendanceSerializer(league_team, many=True).data,
             status=status.HTTP_200_OK,
         )
 
-    elif request.method == "POST":
+    if request.method == "POST":
         models.Team.objects.create(request.data)
         raise exc.ServiceUnavailable
 
-    elif request.method == "PUT":
-        matchResults = forms.MatchResultListForm(request.data)  # Validating INPUT
-        if matchResults.is_valid():
-            response = models.updateLeagueTable(
-                request.data["id"],
-                request.data["goalscore"],
-                request.data["goalconceeded"],
-                len(request.data["id"]),
-            )
+    if request.method == "PUT":
+        match_results = forms.LeagueResultForm(request.data)  # Validating INPUT
+        if match_results.is_valid():
+            response = forms.update_league_table(match_results)
             return Response(response, status=status.HTTP_200_OK)
 
         json_string = json.loads(match_results.errors.as_json())

@@ -1,17 +1,11 @@
 from urllib.request import Request, urlopen
-from django.contrib import admin
-
 
 from bs4 import BeautifulSoup
+from django.contrib import admin
 from django.db import models
 from fake_useragent import UserAgent
 
-from src.common import postgresql as pg
-from src.common import support as sp
-
 # Create your models here.
-
-
 ua = UserAgent()
 
 
@@ -42,10 +36,6 @@ class Team(models.Model):
 class TeamAdmin(admin.ModelAdmin):
     list_display = ("team_name", "team_location")
 
-    @admin.display(description="Birth decade")
-    def decade_born_in(self):
-        return "%d’s" % (self.name)
-
 
 class League(models.Model):
     id = models.AutoField(primary_key=True, db_column="n4_id")
@@ -64,10 +54,6 @@ class League(models.Model):
 @admin.register(League)
 class LeagueAdmin(admin.ModelAdmin):
     list_display = ("name",)
-
-    @admin.display(description="Birth decade")
-    def decade_born_in(self):
-        return "%d’s" % (self.list_display)
 
 
 class TeamAttendance(models.Model):
@@ -101,52 +87,29 @@ class TeamAttendanceAdmin(admin.ModelAdmin):
     list_per_page = 20
     ordering = ("-season", "league")
 
-    @admin.display(description="Birth decade")
-    def decade_born_in(self):
-        return "%d’s" % (self.list_display)
-
 
 # ------------------------- LEAGUE FUNCTIONs ---------------------------------------------------
-def updateLeagueTable(idList, gsList, gcList, nTeam):
-    res = []
-    pg.cursorDB.execute(
-        f"""SELECT * from update_league_table(
-            ARRAY {id_list},
-            ARRAY {goalscore_list},
-            ARRAY {goalconceded_list},
-            {team_number},
-            'PREMIER_LEAGUE',
-            2023)"""
-    )
-    pg.connectionPG.commit()
-    returnRecord = pg.cursorDB.fetchall()
-    if returnRecord == []:
-        return None
-    for record in returnRecord:
-        res.append(dict(zip(sp.leagueTableField, record)))
-    return res
 
 
-def getLeagueResults(dateString: str):
+def get_league_results(date_string: str):
     match_req = Request(
-        f"https://www.espn.com/soccer/fixtures/_/date/{dateString}/league/eng.1"
+        f"https://www.espn.com/soccer/fixtures/_/date/{date_string}/league/eng.1"
     )
     match_req.add_header("User-Agent", ua.random)
-    match_doc = urlopen(match_req).read().decode("utf8")
+    with urlopen(match_req).read().decode("utf8") as match_doc:
+        soup = BeautifulSoup(match_doc, "html.parser")
 
-    soup = BeautifulSoup(match_doc, "html.parser")
+        result_soup = soup.select("tbody>tr.Table__TR")
+        results = {"home": [], "away": [], "score": {}}
 
-    resultSoup = soup.select("tbody>tr.Table__TR")
-    results = {"home": [], "away": [], "score": {}}
-
-    i = 0
-    for res in resultSoup[:10]:
-        teams = [team.text for team in res.select("a.AnchorLink")]
-        score = res.find("a", {"class": "AnchorLink at"}).text.split(" ")
-        if teams[-1] == "FT":
-            results["home"].append(teams[1])
-            results["away"].append(teams[4])
-            results["score"][f"home{i}"] = int(score[1])
-            results["score"][f"away{i}"] = int(score[3])
-            i += 1
-    return results
+        i = 0
+        for res in result_soup[:10]:
+            teams = [team.text for team in res.select("a.AnchorLink")]
+            score = res.find("a", {"class": "AnchorLink at"}).text.split(" ")
+            if teams[-1] == "FT":
+                results["home"].append(teams[1])
+                results["away"].append(teams[4])
+                results["score"][f"home{i}"] = int(score[1])
+                results["score"][f"away{i}"] = int(score[3])
+                i += 1
+        return results

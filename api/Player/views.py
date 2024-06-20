@@ -10,19 +10,16 @@ from api.Player import forms, models, serializers as sr
 from src.common import exceptions as exc
 from src.common import support as sp
 
-from . import forms, models
-from . import serializers as sr
-
 # Create your views here.
 # ALL PLAYER INFOs          ===============================================================
 
 
 @api_view(["GET", "POST"])
-def AllPlayer(request):
+def all_player(request):
     if request.method == "GET":
         players = {}
         try:
-            for position in sp.playerPosition:
+            for position in sp.player_position:
                 players[position + "s"] = models.Player.objects.filter(
                     role=position.upper()
                 ).values()
@@ -45,9 +42,9 @@ def AllPlayer(request):
 
 
 @api_view(["GET"])
-def PlayerByPosition(request, position):
+def player_by_position(request, position):
     if request.method == "GET":
-        if position not in sp.playerPosition:
+        if position not in sp.player_position:
             raise exc.ResourceNotFound
         players = models.Player.objects.filter(player_role=position.upper())
         serialized_player = sr.PlayerSerializer(players, many=True)

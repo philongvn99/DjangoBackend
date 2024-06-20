@@ -2,7 +2,6 @@ from rest_framework import serializers
 
 from api.Player import models
 from src.common import support as sp
-from . import models
 
 
 class PlayerSerializer(serializers.ModelSerializer):
@@ -21,4 +20,4 @@ class PlayerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Player
-        fields = sp.playerFields
+        fields = sp.player_fields

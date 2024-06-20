@@ -32,14 +32,16 @@ STATIC_URL = "/static/"
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # INIT FIREBASE CONFIG
-FIREBASE_CONFIG_FILE = os.path.join(BASE_DIR, 'src/config/firebase/firebase-config.json')
+FIREBASE_CONFIG_FILE = os.path.join(
+    BASE_DIR, "src/config/firebase/firebase-config.json"
+)
 cred = credentials.Certificate(FIREBASE_CONFIG_FILE)
 firebase_admin.initialize_app(cred)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*'] # os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+ALLOWED_HOSTS = ["*"]  # os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 
 # Application definition
 CORS_ALLOW_ALL_ORIGINS = True
@@ -49,8 +51,8 @@ INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.messages",
-    "django.contrib.sessions", # for login admin site
-    "django.contrib.staticfiles", # for web design
+    "django.contrib.sessions",  # for login admin site
+    "django.contrib.staticfiles",  # for web design
     "api.Team",
     "api.Match",
     "api.Player",
@@ -73,10 +75,7 @@ MIDDLEWARE = [
     "_United.middlewares.JwtHandlerMiddleware",
 ]
 
-DISALLOWED_USER_AGENTS = (
-    re.compile(r'^Bingbot'),
-    re.compile(r'^Googlebot')
-)
+DISALLOWED_USER_AGENTS = (re.compile(r"^Bingbot"), re.compile(r"^Googlebot"))
 
 
 ROOT_URLCONF = "_United.urls"
@@ -84,9 +83,7 @@ ROOT_URLCONF = "_United.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [
-            os.path.join(BASE_DIR, 'static/templates/')
-        ],
+        "DIRS": [os.path.join(BASE_DIR, "static/templates/")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -142,13 +139,14 @@ REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
     "DEFAULT_PERMISSION_CLASSES": [
-        'rest_framework.permissions.AllowAny',
+        "rest_framework.permissions.AllowAny",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        'rest_framework.authentication.TokenAuthentication',
+        "rest_framework.authentication.TokenAuthentication",
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
-        # "rest_framework_simplejwt.authentication.JWTAuthentication", # Active if you want to use jwt with local database
+        # Active if you want to use jwt with local database
+        # "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
 }
 
@@ -167,28 +165,32 @@ DATABASES = {
 }
 
 IS_LOGGING = False
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
+LOGGING = (
+    {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "handlers": {
+            "console": {
+                "level": "DEBUG",
+                "class": "logging.StreamHandler",
+            },
+            "file": {
+                "level": "DEBUG",
+                "class": "logging.FileHandler",
+                "filename": "django_queries.log",  # Choose a file name and path
+            },
         },
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': 'django_queries.log',  # Choose a file name and path
+        "loggers": {
+            "django.db.backends": {
+                "handlers": ["console", "file"],
+                "level": "DEBUG",
+                "propagate": False,
+            },
         },
-    },
-    'loggers': {
-        'django.db.backends': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-    },
-} if IS_LOGGING else None
+    }
+    if IS_LOGGING
+    else None
+)
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
@@ -201,4 +203,3 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 ACTIVATE_JWT = True
-

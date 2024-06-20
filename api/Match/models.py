@@ -33,10 +33,6 @@ class Match(models.Model):
 class MatchAdmin(admin.ModelAdmin):
     list_display = ("match_enemy", "match_date", "match_type")
 
-    @admin.display(description="Birth decade")
-    def decade_born_in(self):
-        return f"{self.list_display}’s"
-
 
 class MatchEvent(models.Model):
     MATCH_PARTS = [
@@ -74,7 +70,3 @@ class MatchEvent(models.Model):
 @admin.register(MatchEvent)
 class MatchEventAdmin(admin.ModelAdmin):
     list_display = ("match", "player", "minute", "type")
-
-    @admin.display(description="Birth decade")
-    def decade_born_in(self):
-        return f"{self.list_display} {self.list_display}"
