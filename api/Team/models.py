@@ -11,16 +11,14 @@ ua = UserAgent()
 
 class Team(models.Model):
     id = models.AutoField(primary_key=True, db_column="n4_id")
-    team_name = models.CharField(
-        max_length=50, blank=True, null=True, db_column="str_name"
-    )
-    team_acronym_name = models.CharField(
+    name = models.CharField(max_length=50, blank=True, null=True, db_column="str_name")
+    acronym_name = models.CharField(
         max_length=50, blank=True, null=True, db_column="str_acronym_name"
     )
-    team_logo_link = models.CharField(
+    logo_link = models.CharField(
         max_length=100, blank=True, null=True, db_column="str_logo_link"
     )
-    team_location = models.CharField(
+    location = models.CharField(
         max_length=32, blank=True, null=True, db_column="str_location"
     )
 
@@ -29,12 +27,12 @@ class Team(models.Model):
         db_table = "team"
 
     def __str__(self):
-        return self.team_name
+        return self.name
 
 
 @admin.register(Team)
 class TeamAdmin(admin.ModelAdmin):
-    list_display = ("team_name", "team_location")
+    list_display = ("name", "location")
 
 
 class League(models.Model):
@@ -96,7 +94,9 @@ def get_league_results(date_string: str):
         f"https://www.espn.com/soccer/fixtures/_/date/{date_string}/league/eng.1"
     )
     match_req.add_header("User-Agent", ua.random)
-    with urlopen(match_req).read().decode("utf8") as match_doc:
+    print(f"https://www.espn.com/soccer/fixtures/_/date/{date_string}/league/eng.1")
+    with urlopen(match_req) as req:
+        match_doc = req.read().decode("utf8")
         soup = BeautifulSoup(match_doc, "html.parser")
 
         result_soup = soup.select("tbody>tr.Table__TR")

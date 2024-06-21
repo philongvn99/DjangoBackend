@@ -45,10 +45,18 @@ except:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]  # os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
-
 # Application definition
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "https://example.com",
+    "https://sub.example.com",
+    "http://localhost:3000",
+]
+# os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+
+ACTIVATE_JWT = True
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -62,18 +70,18 @@ INSTALLED_APPS = [
     "api.Player",
     # "rest_framework",
     # "rest_framework.authtoken",
-    # "corsheaders",
+    "corsheaders",
     # "django_filters",
-    # '_United',
+    "_United",
 ]
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "_United.middlewares.JwtHandlerMiddleware",
@@ -198,12 +206,3 @@ LOGGING = (
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
-
-CORS_ALLOWED_ORIGINS = [
-    "https://example.com",
-    "https://sub.example.com",
-    "http://localhost:8080",
-    "http://127.0.0.1:3000",
-]
-
-ACTIVATE_JWT = True
