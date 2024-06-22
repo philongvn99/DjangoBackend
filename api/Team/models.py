@@ -76,7 +76,7 @@ class TeamAttendance(models.Model):
         db_table = "team_attendance"
 
     def __str__(self):
-        return self.team.team_name + "-" + str(self.season)
+        return self.team.name + "-" + str(self.season)
 
 
 @admin.register(TeamAttendance)
