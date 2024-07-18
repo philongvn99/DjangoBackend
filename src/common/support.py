@@ -31,6 +31,7 @@ team_fields = [
 ]
 
 teamAttendanceFields = [
+    "id",
     "play",
     "win",
     "draw",

@@ -1,10 +1,7 @@
+from typing import Dict, List
 from django import forms
-from django.contrib.postgres.forms import SimpleArrayField
 
 from api.Team import models
-
-from src.common import postgresql as pg
-from src.common import support as sp
 
 
 class NewTeamForm(forms.ModelForm):
@@ -19,35 +16,51 @@ class NewTeamAttendanceForm(forms.ModelForm):
         fields = "__all__"
 
 
-class LeagueResultForm(forms.BaseForm):
-    id_list = SimpleArrayField(forms.IntegerField())
-    goalscore_list = SimpleArrayField(forms.IntegerField())
-    goalconceded_list = SimpleArrayField(forms.IntegerField())
-    data_len = forms.IntegerField(max_value=20, min_value=10)
-
-    def __init__(self, data):
-        self.id_list = data["id"]
-        self.goalscore_list = data["goalscore"]
-        self.goalconceded_list = data["goalconceded"]
-        self.data_len = len(data["id"])
-        forms.BaseForm.__init__(self)
+class LeagueMatchResultForm(forms.Form):
+    home_id = forms.IntegerField(min_value=0)
+    away_id = forms.IntegerField(min_value=0)
+    home = forms.IntegerField(min_value=0)
+    away = forms.IntegerField(min_value=0)
 
 
-def update_league_table(data: LeagueResultForm):
-    res = []
-    pg.cursorDB.execute(
-        f"""SELECT * from update_league_table(
-            ARRAY {data.id_list},
-            ARRAY {data.goalscore_list},
-            ARRAY {data.goalconceded_list},
-            {data.data_len},
-            'PREMIER_LEAGUE',
-            2023)"""
-    )
-    pg.connectionPG.commit()
-    return_record = pg.cursorDB.fetchall()
-    if return_record == []:
-        return None
-    for record in return_record:
-        res.append(dict(zip(sp.teamAttendanceFields, record)))
+class TeamUpdateData:
+    def __init__(self, score: int, conceded: int):
+        self.play = 1
+        self.win = int(score > conceded)
+        self.lost = int(score < conceded)
+        self.draw = int(score == conceded)
+        self.score = score
+        self.conceded = conceded
+
+    def update(self, score: int, conceded: int):
+        self.play += 1
+        if score > conceded:
+            self.win += 1
+        elif score == conceded:
+            self.draw += 1
+        else:
+            self.lost += 1
+        self.score += score
+        self.conceded += conceded
+
+
+def convert_result_2_point(result_form: List[LeagueMatchResultForm]):
+    res: Dict[int, TeamUpdateData] = {}
+    for form in result_form:
+        cleaned = form.cleaned_data
+        home_id = cleaned["home_id"]
+        away_id = cleaned["away_id"]
+        home = cleaned["home"]
+        away = cleaned["away"]
+
+        if home_id in res:
+            res[home_id].update(home, away)
+        else:
+            res[home_id] = TeamUpdateData(home, away)
+
+        if away_id in res:
+            res[away_id].update(away, home)
+        else:
+            res[away_id] = TeamUpdateData(away, home)
+
     return res

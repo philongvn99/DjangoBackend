@@ -100,16 +100,16 @@ def get_league_results(date_string: str):
         soup = BeautifulSoup(match_doc, "html.parser")
 
         result_soup = soup.select("tbody>tr.Table__TR")
-        results = {"home": [], "away": [], "score": {}}
+        results = {"home": [], "away": [], "home_score": [], "away_score": []}
 
         i = 0
-        for res in result_soup[:10]:
+        for res in result_soup[:20]:
             teams = [team.text for team in res.select("a.AnchorLink")]
             score = res.find("a", {"class": "AnchorLink at"}).text.split(" ")
             if teams[-1] == "FT":
                 results["home"].append(teams[1])
                 results["away"].append(teams[4])
-                results["score"][f"home{i}"] = int(score[1])
-                results["score"][f"away{i}"] = int(score[3])
+                results["home_score"].append(score[1])
+                results["away_score"].append(score[3])
                 i += 1
         return results
