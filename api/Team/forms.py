@@ -1,3 +1,4 @@
+from typing import Dict, List
 from django import forms
 
 from api.Team import models
@@ -43,8 +44,8 @@ class TeamUpdateData:
         self.conceded += conceded
 
 
-def convert_result_2_point(result_form: list[LeagueMatchResultForm]):
-    res: dict[int, TeamUpdateData] = {}
+def convert_result_2_point(result_form: List[LeagueMatchResultForm]):
+    res: Dict[int, TeamUpdateData] = {}
     for form in result_form:
         cleaned = form.cleaned_data
         home_id = cleaned["home_id"]
