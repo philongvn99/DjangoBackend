@@ -3,6 +3,7 @@ import json
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.db import IntegrityError, transaction
 
 from src.common import exceptions as exc
 from src.common import support as sp
@@ -39,6 +40,7 @@ def league_result(request, date):
 
 
 @api_view(["GET", "POST", "PUT", "DELETE"])
+@transaction.atomic
 def league_table(request, league_id, season=2023):
     if request.method == "GET":
         league_team = models.TeamAttendance.objects.filter(
@@ -56,13 +58,37 @@ def league_table(request, league_id, season=2023):
         raise exc.ServiceUnavailable
 
     if request.method == "PUT":
-        match_results = forms.LeagueResultForm(request.data)  # Validating INPUT
-        if match_results.is_valid():
-            response = forms.update_league_table(match_results)
-            return Response(response, status=status.HTTP_200_OK)
+        match_results = [
+            forms.LeagueMatchResultForm(data) for data in request.data["results"]
+        ]  # Validating INPUT
 
-        json_string = json.loads(match_results.errors.as_json())
+        if all(res.is_valid() for res in match_results):
+            update_values = forms.convert_result_2_point(match_results)
+            update_results = []
+            sid = transaction.savepoint()
+
+            try:
+                with transaction.atomic():
+                    for team_id, update_value in update_values.items():
+                        team_att = models.TeamAttendance.objects.get(pk=team_id)
+
+                        team_att.play += update_value.play
+                        team_att.win += update_value.win
+                        team_att.draw += update_value.draw
+                        team_att.lost += update_value.lost
+                        team_att.score += update_value.score
+                        team_att.conceded += update_value.conceded
+
+                        team_att.save()
+                        update_results.append(team_att.clean())
+            except IntegrityError:
+                transaction.rollback(sid)
+            return Response(update_results, status=status.HTTP_200_OK)
+
+        json_string = json.loads(
+            next(res for res in match_results if not res.is_valid()).errors.as_json()
+        )
         sp.display_error(json_string)
-        return Response(json_string, status=status.HTTP_406_NOT_ACCEPTABLE)
+        return Response(json_string, status=status.HTTP_400_BAD_REQUEST)
 
     return Response({}, status=status.HTTP_200_OK)

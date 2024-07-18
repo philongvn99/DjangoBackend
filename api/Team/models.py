@@ -103,7 +103,7 @@ def get_league_results(date_string: str):
         results = {"home": [], "away": [], "home_score": [], "away_score": []}
 
         i = 0
-        for res in result_soup[:10]:
+        for res in result_soup[:20]:
             teams = [team.text for team in res.select("a.AnchorLink")]
             score = res.find("a", {"class": "AnchorLink at"}).text.split(" ")
             if teams[-1] == "FT":

@@ -17,7 +17,7 @@ def main():
             "forget to activate a virtual environment?"
         ) from exc
     except:
-        exit()
+        sys.exit()
     execute_from_command_line(sys.argv)
 
 
