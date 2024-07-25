@@ -12,12 +12,12 @@ from src.common import exceptions as exc, support as sp
 
 # EPL LEAGUE             ===============================================================
 @api_view(["GET"])
-def league_result_by_round(request: Request, season: int, league_id: int, round=1):
+def league_result_by_round(request: Request, season: int, league_id: int, match_week=1):
     if request.method == "GET":
         matches = (
             models.Match.objects.filter(
                 league_id=league_id,
-                round=round,
+                round=match_week,
                 home__season=season,
                 away__season=season,
             )
@@ -25,7 +25,7 @@ def league_result_by_round(request: Request, season: int, league_id: int, round=
             .select_related("away")
         )
         if len(matches) == 0:
-            crawled_matches = models.get_epl_results_by_round(round)
+            crawled_matches = models.get_epl_results_by_round(match_week)
 
             if len(crawled_matches) == 0:
                 raise exc.ResourceNotFound
@@ -44,7 +44,7 @@ def league_result_by_round(request: Request, season: int, league_id: int, round=
                     external_id=match[0],
                     fthg=match[1][0],
                     ftag=match[1][1],
-                    round=round,
+                    round=match_week,
                     league_id=league_id,
                 )
                 for match in crawled_matches
@@ -100,7 +100,7 @@ def league_result_by_round(request: Request, season: int, league_id: int, round=
 
 @api_view(["GET"])
 def match(request: Request, league_id: int, match_id: int):
-    match = (
+    _match = (
         models.Match.objects.filter(
             league_id=league_id,
             id=match_id,
@@ -108,10 +108,10 @@ def match(request: Request, league_id: int, match_id: int):
         .select_related("home")
         .select_related("away")
     )
-    if match:
+    if _match:
         if request.method == "GET":
             return Response(
-                serializers.MatchSerializer(match[0]).data,
+                serializers.MatchSerializer(_match[0]).data,
                 status=status.HTTP_200_OK,
             )
     return exc.ResourceNotFound

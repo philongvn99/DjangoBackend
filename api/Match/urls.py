@@ -4,7 +4,7 @@ from api.Match import views
 
 urlpatterns = [
     path(
-        "<int:season>/<int:round>",
+        "<int:season>/<int:match_week>",
         views.league_result_by_round,
         name="League Res by round",
     ),

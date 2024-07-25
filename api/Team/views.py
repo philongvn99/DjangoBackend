@@ -51,9 +51,9 @@ def league_table(request: Request, league_id, season=2023):
 @transaction.atomic
 def league(request: Request):
     if request.method == "GET":
-        league = models.League.objects.all()
+        _league = models.League.objects.all()
         return Response(
-            serializers.LeagueSerializer(league, many=True).data,
+            serializers.LeagueSerializer(_league, many=True).data,
             status=status.HTTP_200_OK,
         )
     return Response({}, status=status.HTTP_200_OK)
