@@ -1,12 +1,5 @@
-from urllib.request import Request, urlopen
-
-from bs4 import BeautifulSoup
 from django.contrib import admin
 from django.db import models
-from fake_useragent import UserAgent
-
-# Create your models here.
-ua = UserAgent()
 
 
 class Team(models.Model):
@@ -40,6 +33,12 @@ class League(models.Model):
     name = models.CharField(max_length=50, blank=True, null=True, db_column="str_name")
     host = models.CharField(max_length=50, blank=True, null=True, db_column="str_host")
     type = models.CharField(max_length=50, blank=True, null=True, db_column="str_type")
+    acronym_name = models.CharField(
+        max_length=50, blank=True, null=True, db_column="str_acronym_name"
+    )
+    logo_link = models.CharField(
+        max_length=200, blank=True, null=True, db_column="str_logo_link"
+    )
 
     class Meta:
         managed = True
@@ -56,14 +55,14 @@ class LeagueAdmin(admin.ModelAdmin):
 
 class TeamAttendance(models.Model):
     id = models.AutoField(primary_key=True, db_column="n4_id")
-    play = models.SmallIntegerField(db_column="n4_play")
-    win = models.SmallIntegerField(db_column="n4_win")
-    draw = models.SmallIntegerField(db_column="n4_draw")
-    lost = models.SmallIntegerField(db_column="n4_lost")
-    score = models.SmallIntegerField(db_column="n4_score")
-    conceded = models.SmallIntegerField(db_column="n4_conceded")
-    banned = models.SmallIntegerField(db_column="n4_banned")
-    season = models.SmallIntegerField(db_column="n4_season")
+    play = models.SmallIntegerField(db_column="n4_play", null=False, default=0)
+    win = models.SmallIntegerField(db_column="n4_win", null=False, default=0)
+    draw = models.SmallIntegerField(db_column="n4_draw", null=False, default=0)
+    lost = models.SmallIntegerField(db_column="n4_lost", null=False, default=0)
+    score = models.SmallIntegerField(db_column="n4_score", null=False, default=0)
+    conceded = models.SmallIntegerField(db_column="n4_conceded", null=False, default=0)
+    banned = models.SmallIntegerField(db_column="n4_banned", null=False, default=0)
+    season = models.SmallIntegerField(db_column="n4_season", null=False, default=0)
     league = models.ForeignKey(
         League, models.DO_NOTHING, blank=True, null=True, db_column="n4_league_id"
     )
@@ -84,32 +83,3 @@ class TeamAttendanceAdmin(admin.ModelAdmin):
     list_display = ("team", "league", "season")
     list_per_page = 20
     ordering = ("-season", "league")
-
-
-# ------------------------- LEAGUE FUNCTIONs ---------------------------------------------------
-
-
-def get_league_results(date_string: str):
-    match_req = Request(
-        f"https://www.espn.com/soccer/fixtures/_/date/{date_string}/league/eng.1"
-    )
-    match_req.add_header("User-Agent", ua.random)
-    print(f"https://www.espn.com/soccer/fixtures/_/date/{date_string}/league/eng.1")
-    with urlopen(match_req) as req:
-        match_doc = req.read().decode("utf8")
-        soup = BeautifulSoup(match_doc, "html.parser")
-
-        result_soup = soup.select("tbody>tr.Table__TR")
-        results = {"home": [], "away": [], "home_score": [], "away_score": []}
-
-        i = 0
-        for res in result_soup[:20]:
-            teams = [team.text for team in res.select("a.AnchorLink")]
-            score = res.find("a", {"class": "AnchorLink at"}).text.split(" ")
-            if teams[-1] == "FT":
-                results["home"].append(teams[1])
-                results["away"].append(teams[4])
-                results["home_score"].append(score[1])
-                results["away_score"].append(score[3])
-                i += 1
-        return results
