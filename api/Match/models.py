@@ -1,72 +1,106 @@
+from urllib.request import Request, urlopen
+
+from bs4 import BeautifulSoup
 from django.contrib import admin
 from django.db import models
+from fake_useragent import UserAgent
 
-from api.Player.models import Player
-from api.Team.models import TeamAttendance
+from api.Team.models import League, TeamAttendance
+
+# Create your models here.
+ua = UserAgent()
 
 
 # Create your models here.
 # ==============================================================//
 class Match(models.Model):
-    match_id = models.AutoField(primary_key=True, db_column="n4_id")
-    match_enemy = models.ForeignKey(
-        TeamAttendance, models.CASCADE, null=False, db_column="n4_enemy_id"
+    id = models.AutoField(primary_key=True, db_column="n4_id")
+    home = models.ForeignKey(
+        TeamAttendance,
+        models.CASCADE,
+        null=False,
+        db_column="n4_home_id",
+        related_name="home_team",
     )
-    match_stadium = models.CharField(max_length=50, db_column="str_name")
-    match_home = models.BooleanField()
-    match_home_score = models.IntegerField(blank=True, null=True)
-    match_enemy_score = models.IntegerField(blank=True, null=True)
-    match_date = models.DateField(blank=True, null=True)
-    match_lineup = models.CharField(max_length=5, blank=True, null=True)
-    match_referee = models.CharField(max_length=50, blank=True, null=True)
-    match_type = models.TextField(blank=True, null=True)
+    away = models.ForeignKey(
+        TeamAttendance,
+        models.CASCADE,
+        null=False,
+        db_column="n4_away_id",
+        related_name="away_team",
+    )
+    league = models.ForeignKey(
+        League, models.CASCADE, null=False, db_column="n4_league_id"
+    )
+    round = models.IntegerField(blank=True, null=False, db_column="n4_round")
+    fthg = models.IntegerField(blank=True, null=False, db_column="n4_fthg")
+    ftag = models.IntegerField(blank=True, null=False, db_column="n4_ftag")
+    str_date = models.CharField(max_length=50, blank=True, null=True)
+    external_id = models.IntegerField(blank=True, null=True, db_column="n4_external_id")
 
     class Meta:
         managed = True
         db_table = "match"
 
     def __str__(self):
-        return self.match_enemy.__str__() + " " + self.match_type
+        return (
+            self.home.__str__()
+            + " vs "
+            + self.away.__str__()
+            + " "
+            + self.league.__str__()
+            + " "
+            + self.round.__str__()
+        )
 
 
 @admin.register(Match)
 class MatchAdmin(admin.ModelAdmin):
-    list_display = ("match_enemy", "match_date", "match_type")
+    list_display = ("home", "away", "league_id", "round")
 
 
-class MatchEvent(models.Model):
-    MATCH_PARTS = [
-        ("FIRST_LEG", "FIRST_LEG"),
-        ("SECOND_LEG", "SECOND_LEG"),
-        ("SUB_FIRST", "SUB_FIRST"),
-        ("SUB_SECOND", "SUB_SECOND"),
-        ("PENALTY", "PENALTY"),
-        ("SUBSTITUTE_IN", "SUBSTITUTE_IN"),
-    ]
-    MATCH_TYPE = [
-        ("RED_CARD", "RED_CARD"),
-        ("YELLOW_CARD", "YELLOW_CARD"),
-        ("GOAL", "GOAL"),
-        ("OWN_GOAL", "OWN_GOAL"),
-        ("SUBSTITUTE_OUT", "SUBSTITUTE_OUT"),
-        ("OUT_OF_TIME", "OUT_OF_TIME"),
-    ]
-    id = models.AutoField(primary_key=True, db_column="n4_id")
-    match = models.ForeignKey(
-        Match, models.CASCADE, blank=True, null=False, db_column="n4_match_id"
+# ------------------------- LEAGUE FUNCTIONs ---------------------------------------------------
+def get_league_results_by_date(date_string: str):
+    match_req = Request(
+        f"https://www.espn.com/soccer/fixtures/_/date/{date_string}/league/eng.1"
     )
-    player = models.ForeignKey(
-        Player, models.CASCADE, blank=True, null=False, db_column="n4_player_id"
+    match_req.add_header("User-Agent", ua.random)
+    print(f"https://www.espn.com/soccer/fixtures/_/date/{date_string}/league/eng.1")
+    with urlopen(match_req) as req:
+        match_doc = req.read().decode("utf8")
+        soup = BeautifulSoup(match_doc, "html.parser")
+
+        result_soup = soup.select("tbody>tr.Table__TR")
+        results = {"home": [], "away": [], "home_score": [], "away_score": []}
+
+        i = 0
+        for res in result_soup[:20]:
+            teams = [team.text for team in res.select("a.AnchorLink")]
+            score = res.find("a", {"class": "AnchorLink at"}).text.split(" ")
+            if teams[-1] == "FT":
+                results["home"].append(teams[1])
+                results["away"].append(teams[4])
+                results["home_score"].append(score[1])
+                results["away_score"].append(score[3])
+                i += 1
+        return results
+
+
+def get_epl_results_by_round(match_week: int):
+    match_week_req = Request(
+        f"https://www.premierleague.com/matchweek/{match_week + 12268}/blog?match=true"
     )
-    minute = models.IntegerField(db_column="n4_minute")
-    part = models.TextField(choices=MATCH_PARTS, null=True, db_column="str_half")
-    type = models.TextField(choices=MATCH_TYPE, null=True, db_column="str_type")
-
-    class Meta:
-        managed = True
-        db_table = "match_event"
-
-
-@admin.register(MatchEvent)
-class MatchEventAdmin(admin.ModelAdmin):
-    list_display = ("match", "player", "minute", "type")
+    match_week_req.add_header("User-Agent", ua.random)
+    with urlopen(match_week_req) as match_week_doc:
+        doc = match_week_doc.read().decode("utf8")
+        match_results = list(
+            [
+                m.attrs["href"].split("/")[-1],
+                m.select_one("span.match-fixture__score").text.split("-"),
+                [team.text for team in m.select("div>span.match-fixture__team-name")],
+            ]
+            for m in BeautifulSoup(doc, "html.parser").select(
+                "a.match-fixture--abridged"
+            )
+        )
+        return match_results

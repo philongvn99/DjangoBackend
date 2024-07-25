@@ -1,14 +1,14 @@
 import json
 
 
+from requests import Request
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from api.Player import forms, models, serializers as sr
 
-from src.common import exceptions as exc
-from src.common import support as sp
+from src.common import exceptions as exc, support as sp
 
 # Create your views here.
 # ALL PLAYER INFOs          ===============================================================
@@ -42,7 +42,7 @@ def all_player(request):
 
 
 @api_view(["GET"])
-def player_by_position(request, position):
+def player_by_position(request: Request, position):
     if request.method == "GET":
         if position not in sp.player_position:
             raise exc.ResourceNotFound
@@ -56,7 +56,7 @@ def player_by_position(request, position):
 
 
 @api_view(["GET", "PUT", "DELETE"])
-def player_by_id(request, player_id):
+def player_by_id(request: Request, player_id):
     player = models.Player.objects.filter(id=player_id)
     if player:
         if request.method == "GET":
