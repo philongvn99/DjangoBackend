@@ -86,9 +86,11 @@ def get_league_results_by_date(date_string: str):
         return results
 
 
-def get_epl_results_by_round(match_week: int):
+def get_epl_results_by_round(season: int, match_week: int):
+    season_start_id = {2024: 12268, 2023: 7830}
     match_week_req = Request(
-        f"https://www.premierleague.com/matchweek/{match_week + 12268}/blog?match=true"
+        f"https://www.premierleague.com/matchweek/{match_week + season_start_id[season]}\
+            /blog?match=true"
     )
     match_week_req.add_header("User-Agent", ua.random)
     with urlopen(match_week_req) as match_week_doc:
@@ -104,3 +106,17 @@ def get_epl_results_by_round(match_week: int):
             )
         )
         return match_results
+
+
+def update_remote_dynamodb(season: int, match_week: int):
+    request = Request(
+        f"https://mu5slwbyja.execute-api.ap-southeast-1.amazonaws.com/\
+            default/league-season?\
+            league=epl\
+            &season={season}\
+            &round={match_week}"
+    )
+    request.add_header("User-Agent", ua.random)
+    request.get_method = lambda: "PATCH"
+    with urlopen(request):
+        return True

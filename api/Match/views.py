@@ -25,7 +25,7 @@ def league_result_by_round(request: Request, season: int, league_id: int, match_
             .select_related("away")
         )
         if len(matches) == 0:
-            crawled_matches = models.get_epl_results_by_round(match_week)
+            crawled_matches = models.get_epl_results_by_round(season, match_week)
 
             if len(crawled_matches) == 0:
                 raise exc.ResourceNotFound
@@ -78,6 +78,8 @@ def league_result_by_round(request: Request, season: int, league_id: int, match_
                             team_att.conceded += update_value.conceded
 
                             team_att.save()
+
+                        models.update_remote_dynamodb(season, match_week)
 
                     else:
                         json_string = json.loads(
