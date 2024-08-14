@@ -2,6 +2,7 @@ import json
 from urllib.request import Request
 
 from django.db import IntegrityError, transaction
+from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -117,3 +118,15 @@ def match(request: Request, league_id: int, match_id: int):
                 status=status.HTTP_200_OK,
             )
     return exc.ResourceNotFound
+
+
+@api_view(["GET"])
+# pylint: disable=unused-argument
+def external_match(request: Request, league_id, match_id):
+    if request.method == "GET":
+        json_res = models.get_external_match_detail(match_id)
+        return JsonResponse(
+            json_res,
+            status=status.HTTP_200_OK,
+        )
+    return Response({}, status=status.HTTP_200_OK)

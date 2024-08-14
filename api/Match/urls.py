@@ -9,4 +9,5 @@ urlpatterns = [
         name="League Res by round",
     ),
     path("<int:match_id>", views.match, name="Match Details"),
+    path("external/<int:match_id>", views.external_match, name="Match Details"),
 ]
