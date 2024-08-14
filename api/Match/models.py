@@ -1,3 +1,4 @@
+import json
 from urllib.request import Request, urlopen
 
 from bs4 import BeautifulSoup
@@ -89,8 +90,8 @@ def get_league_results_by_date(date_string: str):
 def get_epl_results_by_round(season: int, match_week: int):
     season_start_id = {2024: 12268, 2023: 7830}
     match_week_req = Request(
-        f"https://www.premierleague.com/matchweek/{match_week + season_start_id[season]}\
-            /blog?match=true"
+        f"https://www.premierleague.com/matchweek/{match_week + season_start_id[season]}/"
+        f"blog?match=true"
     )
     match_week_req.add_header("User-Agent", ua.random)
     with urlopen(match_week_req) as match_week_doc:
@@ -108,13 +109,38 @@ def get_epl_results_by_round(season: int, match_week: int):
         return match_results
 
 
+def get_external_match_detail(match_id: str):
+    match_stat_req = Request(
+        f"https://footballapi.pulselive.com/football/stats/match/{match_id}"
+    )
+    match_stat_req.add_header("User-Agent", ua.random)
+    match_stat_req.add_header(
+        "User-Agent",
+        "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 \
+        (KHTML, like Gecko) Chrome/73.0.3683.75 Safari/537.36",
+    )
+    match_stat_req.add_header("Origin", "https://www.premierleague.com")
+    match_stat_req.add_header(
+        "Content-Type",
+        "application/x-www-form-urlencoded; charset=UTF-8",
+    )
+    match_stat_req.add_header(
+        "Referer",
+        "https://www.premierleague.com//clubs/1/Arsenal/squad?se=79",
+    )
+    with urlopen(match_stat_req) as query:
+        decoded = query.read().decode("utf8")
+        data = json.loads(decoded)
+        return data
+
+
 def update_remote_dynamodb(season: int, match_week: int):
     request = Request(
-        f"https://mu5slwbyja.execute-api.ap-southeast-1.amazonaws.com/\
-            default/league-season?\
-            league=epl\
-            &season={season}\
-            &round={match_week}"
+        f"https://mu5slwbyja.execute-api.ap-southeast-1.amazonaws.com/"
+        f"default/league-season?"
+        f"league=epl"
+        f"&season={season}"
+        f"&round={match_week}"
     )
     request.add_header("User-Agent", ua.random)
     request.get_method = lambda: "PATCH"
