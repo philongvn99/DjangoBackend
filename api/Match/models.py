@@ -6,6 +6,7 @@ from django.contrib import admin
 from django.db import models
 from fake_useragent import UserAgent
 
+from api.Match.forms import BsObject
 from api.Team.models import League, TeamAttendance
 
 # Create your models here.
@@ -88,7 +89,7 @@ def get_league_results_by_date(date_string: str):
 
 
 def get_epl_results_by_round(season: int, match_week: int):
-    season_start_id = {2024: 12268, 2023: 7830}
+    season_start_id = {2025: 18389, 2024: 12268, 2023: 7830}
     match_week_req = Request(
         f"https://www.premierleague.com/matchweek/{match_week + season_start_id[season]}/"
         f"blog?match=true"
@@ -99,7 +100,9 @@ def get_epl_results_by_round(season: int, match_week: int):
         match_results = list(
             [
                 m.attrs["href"].split("/")[-1],
-                m.select_one("span.match-fixture__score").text.split("-"),
+                (
+                    m.select_one("span.match-fixture__score") or BsObject("100-100")
+                ).text.split("-"),
                 [team.text for team in m.select("div>span.match-fixture__team-name")],
             ]
             for m in BeautifulSoup(doc, "html.parser").select(
