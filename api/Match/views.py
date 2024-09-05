@@ -51,54 +51,69 @@ def league_result_by_round(request: Request, season: int, league_id: int, match_
                 for match in crawled_matches
             ]
 
-            sid = transaction.savepoint()
-            try:
-                with transaction.atomic():
+            if (
+                len([filter(lambda i: i.fthg == 100 and i.ftag == 100, match_input)])
+                == 0
+            ):
+                sid = transaction.savepoint()
+                try:
+                    with transaction.atomic():
 
-                    matches = models.Match.objects.bulk_create(
-                        match_input,
-                        len(crawled_matches),
-                    )
-
-                    match_result_forms = [
-                        forms.LeagueMatchResultForm(data.__dict__)
-                        for data in match_input
-                    ]  # Validating INPUT
-
-                    if all(res.is_valid() for res in match_result_forms):
-                        update_values = forms.convert_result_2_point(match_result_forms)
-
-                        for team_id, update_value in update_values.items():
-                            team_att = models.TeamAttendance.objects.get(pk=team_id)
-
-                            team_att.play += update_value.play
-                            team_att.win += update_value.win
-                            team_att.draw += update_value.draw
-                            team_att.lost += update_value.lost
-                            team_att.score += update_value.score
-                            team_att.conceded += update_value.conceded
-
-                            team_att.save()
-
-                        models.update_remote_dynamodb(season, match_week)
-
-                    else:
-                        json_string = json.loads(
-                            next(
-                                res for res in match_result_forms if not res.is_valid()
-                            ).errors.as_json()
+                        matches = models.Match.objects.bulk_create(
+                            match_input,
+                            len(crawled_matches),
                         )
-                        sp.display_error(json_string)
-                        return Response(json_string, status=status.HTTP_400_BAD_REQUEST)
-            except IntegrityError:
-                transaction.rollback(sid)
+
+                        match_result_forms = [
+                            forms.LeagueMatchResultForm(data.__dict__)
+                            for data in match_input
+                        ]  # Validating INPUT
+
+                        if all(res.is_valid() for res in match_result_forms):
+                            update_values = forms.convert_result_2_point(
+                                match_result_forms
+                            )
+
+                            for team_id, update_value in update_values.items():
+                                team_att = models.TeamAttendance.objects.get(pk=team_id)
+
+                                team_att.play += update_value.play
+                                team_att.win += update_value.win
+                                team_att.draw += update_value.draw
+                                team_att.lost += update_value.lost
+                                team_att.score += update_value.score
+                                team_att.conceded += update_value.conceded
+
+                                team_att.save()
+
+                            models.update_remote_dynamodb(season, match_week)
+
+                        else:
+                            json_string = json.loads(
+                                next(
+                                    res
+                                    for res in match_result_forms
+                                    if not res.is_valid()
+                                ).errors.as_json()
+                            )
+                            sp.display_error(json_string)
+                            return Response(
+                                json_string, status=status.HTTP_400_BAD_REQUEST
+                            )
+                except IntegrityError:
+                    transaction.rollback(sid)
+
+            return Response(
+                serializers.MatchSerializer(match_input, many=True).data,
+                status=status.HTTP_200_OK,
+            )
 
         return Response(
             serializers.MatchSerializer(matches, many=True).data,
             status=status.HTTP_200_OK,
         )
 
-    return Response({}, status=status.HTTP_200_OK)
+    return Response([], status=status.HTTP_200_OK)
 
 
 @api_view(["GET"])

@@ -51,14 +51,13 @@ def main(match_week):
         f"https://www.premierleague.com/matchweek/{match_week}/blog?match=true"
     )
     match_week_req.add_header("User-Agent", ua.random)
-    with urlopen(match_week_req).read().decode("utf8") as match_week_doc:
+    with urlopen(match_week_req) as match_week_doc:
         match_id_list = list(
             m.attrs["href"]
-            for m in BeautifulSoup(match_week_doc, "html.parser").select(
-                "a.match-fixture--abridged"
-            )
+            for m in BeautifulSoup(
+                match_week_doc.read().decode("utf8"), "html.parser"
+            ).select("a.match-fixture--abridged")
         )
-        print(match_id_list)
 
         filename = "src/crawling/match_stats.csv"
         fields = [
@@ -96,13 +95,12 @@ def main(match_week):
             for i in match_id_list:
                 match_stat_req = Request(f"https://www.premierleague.com{i}")
                 match_stat_req.add_header("User-Agent", ua.random)
-                with urlopen(match_stat_req).read().decode("utf8") as match_doc:
-
+                with urlopen(match_stat_req) as uo:
                     ref = list(
                         t.text.strip()
-                        for t in BeautifulSoup(match_doc, "html.parser").findAll(
-                            class_="mc-summary__info"
-                        )
+                        for t in BeautifulSoup(
+                            uo.read().decode("utf8"), "html.parser"
+                        ).findAll(class_="mc-summary__info")
                     )[-1].split(": ")[-1]
 
                     match_stat_req = Request(
@@ -122,8 +120,8 @@ def main(match_week):
                         "Referer",
                         "https://www.premierleague.com//clubs/1/Arsenal/squad?se=79",
                     )
-                    with urlopen(match_stat_req).read().decode("utf8") as query:
-                        match_info = json.loads(query)
+                    with urlopen(match_stat_req) as sub_uo:
+                        match_info = json.loads(sub_uo.read().decode("utf8"))
 
                         match_stats = MatchStatistic(match_info)
                         match_stats.get_stats(match_info)
@@ -132,6 +130,6 @@ def main(match_week):
 
 
 if __name__ == "__main__":
-    matchWeek = int(args.MatchWeek)
-    main(matchWeek + 12268)
+    matchWeek = int(args.match_week)
+    main(matchWeek + 18389)
     print("Finish!")

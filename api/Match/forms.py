@@ -62,3 +62,8 @@ def convert_result_2_point(result_form: List[LeagueMatchResultForm]):
             res[away_id] = TeamUpdateData(ftag, fthg)
 
     return res
+
+
+class BsObject:
+    def __init__(self, text):
+        self.text = text
