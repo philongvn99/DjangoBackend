@@ -52,7 +52,9 @@ def league_result_by_round(request: Request, season: int, league_id: int, match_
             ]
 
             if (
-                len([filter(lambda i: i.fthg == 100 and i.ftag == 100, match_input)])
+                len(
+                    list(filter(lambda i: i.fthg == 100 and i.ftag == 100, match_input))
+                )
                 == 0
             ):
                 sid = transaction.savepoint()
