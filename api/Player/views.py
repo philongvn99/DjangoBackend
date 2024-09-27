@@ -27,11 +27,14 @@ def all_player(request):
         except Exception as e:
             raise e
     elif request.method == "POST":
-        new_player = forms.NewPlayerForm(request.data or None)
-        if new_player.is_valid():
-            new_player.save()
-            return Response(new_player.cleaned_data, status.HTTP_201_CREATED)
-        json_str = json.loads(new_player.errors.as_json())
+        new_player_form = forms.NewPlayerForm(request.data or None)
+        if new_player_form.is_valid():
+            new_player = new_player_form.save()
+            return Response(
+                {**(new_player_form.cleaned_data), "id": new_player.id},
+                status.HTTP_201_CREATED,
+            )
+        json_str = json.loads(new_player_form.errors.as_json())
         print(json_str)
         raise exc.InvalidInput(json_str)
     else:
@@ -73,4 +76,4 @@ def player_by_id(request: Request, player_id):
         if request.method == "DELETE":
             player.delete()
             return Response(player, status=status.HTTP_202_ACCEPTED)
-    return exc.ResourceNotFound
+    raise exc.ResourceNotFound

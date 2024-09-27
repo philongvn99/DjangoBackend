@@ -43,20 +43,14 @@ def league_result_by_round(request: Request, season: int, league_id: int, match_
                     home_id=team_attendances[match[2][0]],
                     away_id=team_attendances[match[2][1]],
                     external_id=match[0],
-                    fthg=match[1][0],
-                    ftag=match[1][1],
+                    fthg=int(match[1][0]),
+                    ftag=int(match[1][1]),
                     round=match_week,
                     league_id=league_id,
                 )
                 for match in crawled_matches
             ]
-
-            if (
-                len(
-                    list(filter(lambda i: i.fthg == 100 and i.ftag == 100, match_input))
-                )
-                == 0
-            ):
+            if all(i.fthg != 100 and i.ftag != 100 for i in match_input):
                 sid = transaction.savepoint()
                 try:
                     with transaction.atomic():
@@ -127,6 +121,7 @@ def match(request: Request, league_id: int, match_id: int):
         )
         .select_related("home")
         .select_related("away")
+        .order_by("status")
     )
     if _match:
         if request.method == "GET":
