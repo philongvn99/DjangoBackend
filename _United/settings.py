@@ -19,7 +19,7 @@ import firebase_admin
 from dotenv import load_dotenv
 from firebase_admin import credentials
 
-load_dotenv()
+load_dotenv(override=True)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,8 +39,8 @@ try:
     )
     cred = credentials.Certificate(FIREBASE_CONFIG_FILE)
     firebase_admin.initialize_app(cred)
-except:
-    print("CANNOT CONNECT FIREBASE")
+except Exception as e:
+    print("CANNOT CONNECT FIREBASE by error: ", e)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

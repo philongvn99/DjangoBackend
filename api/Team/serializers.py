@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from api.Team import models
-from src.common import support as sp
+from common import constants as sp
 
 
 class TeamSerializer(serializers.ModelSerializer):

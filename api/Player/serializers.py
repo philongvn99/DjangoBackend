@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from api.Player import models
-from src.common import support as sp
+from common import constants as sp
 
 
 class PlayerSerializer(serializers.ModelSerializer):

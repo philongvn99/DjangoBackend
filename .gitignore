@@ -1,7 +1,6 @@
 /pldjango
 /Lib
-/.vscode
+**/.vscode/
 *\__pycache__
-src/config/firebase
+src/config/**/*.json
 .env*
-*.csv

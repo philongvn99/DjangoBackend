@@ -1,14 +1,14 @@
 import json
 
-
 from requests import Request
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from api.Player import forms, models, serializers as sr
-
-from src.common import exceptions as exc, support as sp
+from api.Player import forms, models
+from api.Player import serializers as sr
+from common import constants as sp
+from common import exceptions as exc
 
 # Create your views here.
 # ALL PLAYER INFOs          ===============================================================

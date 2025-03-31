@@ -1,8 +1,12 @@
 import logging
 import re
 
+from django.http import HttpResponse, JsonResponse
+from firebase_admin import auth
 from requests import Request
+from rest_framework import status
 
+from common.constants import regex_bearer
 
 
 class JwtHandlerMiddleware:
@@ -17,34 +21,33 @@ class JwtHandlerMiddleware:
         # One-time configuration and initialization.
 
     def __call__(self, request):
-        # for pattern in self.exclude_urls:
-        #     if pattern.match(request.path_info):
-        #         return self.get_response(request)
+        for pattern in self.exclude_urls:
+            if pattern.match(request.path_info):
+                return self.get_response(request)
 
-        # header_authorization_value = request.META.get("HTTP_AUTHORIZATION")
-        # if not header_authorization_value:
-        #     return HttpResponse(
-        #         "No authentication token provided", status=status.HTTP_401_UNAUTHORIZED
-        #     )
+        header_authorization_value = request.META.get("HTTP_AUTHORIZATION")
+        if not header_authorization_value:
+            return HttpResponse(
+                "No authentication token provided", status=status.HTTP_401_UNAUTHORIZED
+            )
 
-        # match = sp.regex_bearer.match(header_authorization_value)
-        # if not match:
-        #     return HttpResponse(
-        #         "No authentication token provided", status=status.HTTP_401_UNAUTHORIZED
-        #     )
+        match = regex_bearer.match(header_authorization_value)
+        if not match:
+            return HttpResponse(
+                "No authentication token provided", status=status.HTTP_401_UNAUTHORIZED
+            )
 
-        # firebase_jwt = match.groups()[-1]
-        # try:
-        #     decoded_token = auth.verify_id_token(firebase_jwt)
-        #     uid = decoded_token.get("uid")
-        #     print(f"Request from user ${uid}")
-        # except auth.ExpiredIdTokenError as e:
-        #     return JsonResponse(
-        #         data={"message": "ExpiredToken", "detail": e.__str__()},
-        #         status=status.HTTP_401_UNAUTHORIZED,
-        #     )
+        firebase_jwt = match.groups()[-1]
+        try:
+            decoded_token = auth.verify_id_token(firebase_jwt)
+            uid = decoded_token.get("uid")
+            print(f"Request from user ${uid}")
+        except auth.ExpiredIdTokenError as e:
+            return JsonResponse(
+                data={"message": "ExpiredToken", "detail": e.__str__()},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
         response = self.get_response(request)
-        print(response)
         return response
 
     def process_exception(self, request: Request, exception):
