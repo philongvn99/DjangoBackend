@@ -2,7 +2,6 @@
 # Table-name LIST
 import re
 
-
 player_position = ["goalkeeper", "defender", "midfielder", "forward"]
 
 # Player-information FIELDS

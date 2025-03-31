@@ -8,7 +8,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from api.Match import forms, models, serializers
-from src.common import exceptions as exc, support as sp
+from common import constants as sp
+from common import exceptions as exc
 
 
 # EPL LEAGUE             ===============================================================
@@ -26,7 +27,8 @@ def league_result_by_round(request: Request, season: int, league_id: int, match_
             .select_related("away")
         )
         if len(matches) == 0:
-            crawled_matches = models.get_epl_results_by_round(season, match_week)
+            crawled_matches = models.get_epl_results_by_round(
+                season, match_week)
 
             if len(crawled_matches) == 0:
                 raise exc.ResourceNotFound
@@ -71,7 +73,8 @@ def league_result_by_round(request: Request, season: int, league_id: int, match_
                             )
 
                             for team_id, update_value in update_values.items():
-                                team_att = models.TeamAttendance.objects.get(pk=team_id)
+                                team_att = models.TeamAttendance.objects.get(
+                                    pk=team_id)
 
                                 team_att.play += update_value.play
                                 team_att.win += update_value.win

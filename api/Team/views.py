@@ -1,16 +1,13 @@
 import json
-from requests import Request
 
+from django.db import transaction
+from requests import Request
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from django.db import transaction
 
-from src.common import exceptions as exc
-
-from api.Team import forms
-from api.Team import models
-from api.Team import serializers
+from api.Team import forms, models, serializers
+from common import exceptions as exc
 
 
 # Create your views here.
